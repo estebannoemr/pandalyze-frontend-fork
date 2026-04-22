@@ -1,0 +1,559 @@
+/* ============================================================
+   Estilos del módulo de Desafíos + Gamificación
+   Paleta base de la app: fondo general #b9e2f7
+   Dificultades: básico #28a745 · intermedio #fd7e14 · avanzado #dc3545
+   ============================================================ */
+
+.challenges-section {
+  padding: 16px;
+  background-color: transparent;
+}
+
+/* --------------------- Perfil de gamificación --------------------- */
+
+.gamification-profile {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+.gamification-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.gamification-avatar {
+  font-size: 48px;
+  line-height: 1;
+  background: #b9e2f7;
+  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gamification-profile-info {
+  flex-grow: 1;
+}
+
+.gamification-level-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.gamification-level-badge {
+  background: #0d6efd;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 12px;
+}
+
+.gamification-level-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.gamification-points {
+  margin-top: 4px;
+  color: #5f6565;
+  font-size: 0.95rem;
+}
+
+.gamification-points strong {
+  color: #0d6efd;
+  font-size: 1.1rem;
+}
+
+.gamification-points-separator {
+  margin: 0 8px;
+  color: #bbb;
+}
+
+.gamification-progress-container {
+  margin-top: 16px;
+}
+
+.gamification-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.gamification-progress-bar {
+  width: 100%;
+  height: 14px;
+  background: #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gamification-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0d6efd, #6dd5ed);
+  transition: width 0.5s ease;
+}
+
+/* --------------------- Emblemas --------------------- */
+
+.gamification-badges {
+  margin-top: 20px;
+}
+
+.gamification-badges-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.gamification-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+.gamification-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 8px;
+  border-radius: 10px;
+  background: #f8f9fa;
+  cursor: help;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gamification-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.gamification-badge.earned {
+  background: linear-gradient(135deg, #fff4cc, #ffe17a);
+  border: 2px solid #ffcc33;
+}
+
+.gamification-badge.locked {
+  filter: grayscale(1) opacity(0.4);
+}
+
+.gamification-badge-emoji {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.gamification-badge-name {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+/* --------------------- Filtros --------------------- */
+
+.challenges-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.challenges-filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.challenges-filter-label {
+  font-weight: 600;
+  color: #5f6565;
+  margin-right: 4px;
+}
+
+.challenges-filter-btn {
+  border: 1px solid #dee2e6;
+  background: #fff;
+  color: #495057;
+}
+
+.challenges-filter-btn:hover {
+  background: #f1f3f5;
+}
+
+.challenges-filter-btn.active {
+  background: #0d6efd;
+  color: #fff;
+  border-color: #0d6efd;
+}
+
+.challenges-filter-btn.difficulty-basico.active {
+  background: #28a745;
+  border-color: #28a745;
+}
+.challenges-filter-btn.difficulty-intermedio.active {
+  background: #fd7e14;
+  border-color: #fd7e14;
+}
+.challenges-filter-btn.difficulty-avanzado.active {
+  background: #dc3545;
+  border-color: #dc3545;
+}
+
+/* --------------------- Grilla de desafíos --------------------- */
+
+.challenges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.challenges-loading,
+.challenges-error,
+.challenges-empty {
+  background: #ffffff;
+  padding: 14px;
+  border-radius: 10px;
+  text-align: center;
+  color: #495057;
+  margin-bottom: 16px;
+}
+
+.challenges-error {
+  background: #f8d7da;
+  color: #842029;
+  border: 1px solid #f5c2c7;
+}
+
+/* --------------------- Cards --------------------- */
+
+.challenge-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  border: 2px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.challenge-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.challenge-card.completed {
+  border-color: #28a745;
+}
+
+.challenge-card.active {
+  border-color: #0d6efd;
+}
+
+.challenge-card.locked {
+  background: #f1f3f5;
+  filter: grayscale(0.4) opacity(0.85);
+}
+
+.challenge-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.challenge-difficulty-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 12px;
+  color: #fff;
+}
+
+.challenge-difficulty-badge.difficulty-basico {
+  background: #28a745;
+}
+.challenge-difficulty-badge.difficulty-intermedio {
+  background: #fd7e14;
+}
+.challenge-difficulty-badge.difficulty-avanzado {
+  background: #dc3545;
+}
+
+.challenge-points-badge {
+  background: #fff4cc;
+  color: #8a6d1f;
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 12px;
+}
+
+.challenge-card-title {
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 4px 0;
+}
+
+.challenge-check {
+  color: #28a745;
+}
+
+.challenge-lock {
+  color: #6c757d;
+}
+
+.challenge-card-category {
+  font-size: 0.8rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.challenge-card-description {
+  color: #495057;
+  font-size: 0.9rem;
+  flex-grow: 1;
+  margin-bottom: 12px;
+}
+
+.challenge-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.challenge-locked-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* --------------------- ChallengeModal --------------------- */
+
+.challenge-modal {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 380px;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 2px solid #0d6efd;
+}
+
+.challenge-modal.minimized {
+  width: 220px;
+  max-height: 50px;
+}
+
+.challenge-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #0d6efd;
+  color: #fff;
+  gap: 8px;
+}
+
+.challenge-modal-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.challenge-modal-header-badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.challenge-modal-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.challenge-modal-icon-btn {
+  background: transparent;
+  color: #fff;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.challenge-modal-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.challenge-modal-body {
+  padding: 14px;
+  overflow-y: auto;
+  flex-grow: 1;
+  font-size: 0.9rem;
+  color: #2c3e50;
+}
+
+.challenge-modal-section {
+  margin-bottom: 12px;
+}
+
+.challenge-modal-dataset {
+  background: #e7f5ff;
+  border: 1px solid #74c0fc;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+}
+
+.challenge-modal-dataset.loading {
+  background: #fff3bf;
+  border-color: #ffd43b;
+}
+
+.challenge-modal-dataset.error {
+  background: #f8d7da;
+  border-color: #f5c2c7;
+  color: #842029;
+}
+
+.challenge-modal-instructions {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.challenge-modal-instructions li {
+  margin-bottom: 4px;
+}
+
+.challenge-modal-collapsible {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.challenge-modal-collapsible summary {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 500;
+  background: #f8f9fa;
+}
+
+.challenge-modal-collapsible[open] summary {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.challenge-modal-collapsible p,
+.challenge-modal-collapsible pre {
+  padding: 8px 12px;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.challenge-modal-collapsible pre {
+  background: #282c34;
+  color: #abb2bf;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.challenge-modal-theory-link {
+  padding: 8px 12px;
+  display: block;
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.challenge-modal-theory-link:hover {
+  text-decoration: underline;
+}
+
+.challenge-modal-result {
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+.challenge-modal-result.passed {
+  background: #d1e7dd;
+  border: 1px solid #badbcc;
+  color: #0f5132;
+}
+
+.challenge-modal-result.failed {
+  background: #f8d7da;
+  border: 1px solid #f5c2c7;
+  color: #842029;
+}
+
+.challenge-modal-result-title {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.challenge-modal-footer {
+  padding: 10px 14px;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: #f8f9fa;
+}
+
+.challenge-modal-footer .btn {
+  flex-grow: 1;
+  min-width: 110px;
+}
+
+/* Responsive: en pantallas muy chicas el modal ocupa todo el ancho */
+@media screen and (max-width: 600px) {
+  .challenge-modal {
+    right: 8px;
+    left: 8px;
+    bottom: 8px;
+    width: auto;
+    max-width: none;
+  }
+
+  .challenge-modal.minimized {
+    width: auto;
+    max-width: 260px;
+    left: auto;
+  }
+}

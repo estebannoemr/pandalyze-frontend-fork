@@ -41,3 +41,68 @@
     flex-direction: column;
   }
 }
+
+/* ============================================================
+   Tabs de navegación (Editor / Desafíos)
+   ============================================================ */
+
+.app-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 3px solid #0d6efd;
+  margin-bottom: 16px;
+  padding: 0 8px;
+}
+
+.app-tab {
+  position: relative;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  color: #5f6565;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 10px 18px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  cursor: pointer;
+  transform: translateY(3px);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.app-tab:hover {
+  background: rgba(13, 110, 253, 0.08);
+  color: #0d6efd;
+}
+
+.app-tab.active {
+  background: #ffffff;
+  color: #0d6efd;
+  border-color: #0d6efd;
+  border-bottom-color: #ffffff;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.app-tab-badge {
+  background: #28a745;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  min-width: 22px;
+  text-align: center;
+}
+
+/* Paneles de tab */
+.app-tab-panel.active {
+  display: block;
+}
+
+/* Mantenemos el editor montado pero oculto para que Blockly siga inicializado */
+.app-tab-panel.inactive {
+  display: none;
+}
