@@ -9,9 +9,10 @@ Pandalyze Frontend es una aplicación desarrollada para enseñar Ciencia de Dato
 ## Instalación
 ```
 npm install
+cat .env.development > .env
 npm start
 ```
 
 
 ### Contacto
-pandalyze.edu@gmail.com
+pandalyze.estebanmr@gmail.com

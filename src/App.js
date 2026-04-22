@@ -6,9 +6,7 @@ import WelcomeModal from "./components/welcomeModal/WelcomeModal";
 import OutputConsole from "./components/outputConsole/OutputConsole";
 import ChallengesSection from "./components/challenges/ChallengesSection";
 import ChallengeModal from "./components/challenges/ChallengeModal";
-import {
-  getChallengeCsv,
-} from "./components/challenges/challengesApi";
+import { getChallengeCsv } from "./components/challenges/challengesApi";
 import {
   uploadCsvFile,
   csvStringToFile,
@@ -32,7 +30,7 @@ function App() {
 
   // Desafío actualmente activo (modal abierto sobre el editor)
   const [activeChallenge, setActiveChallenge] = useState(null);
-  const [challengeCsvStatus, setChallengeCsvStatus] = useState("idle"); // idle | loading | ready | error
+  const [challengeCsvStatus, setChallengeCsvStatus] = useState("idle");
   const [challengeCsvError, setChallengeCsvError] = useState("");
 
   // Estado de gamificación a nivel app (persistido en localStorage)
@@ -53,7 +51,7 @@ function App() {
     }
   });
 
-  // Health check periódico para mantener el backend despierto (misma lógica existente)
+  // Health check periódico para mantener el backend despierto
   const fetchHealthCheck = async () => {
     try {
       const response = await fetch(API_URL + "/healthCheck", { timeout: 5000 });
@@ -82,12 +80,10 @@ function App() {
   const handleCloseInitialAlert = () => setShowInitialInstructionsAlert(false);
   const handleOpenInitialAlert = () => setShowInitialInstructionsAlert(true);
 
-  // ------------------------------------------------------------------
   // Inicio de un desafío:
   //   1. pedimos el CSV al backend
   //   2. lo subimos al backend con /uploadCsv y lo registramos en BlocksService
   //   3. abrimos el modal y cambiamos al tab del editor
-  // ------------------------------------------------------------------
   const handleStartChallenge = useCallback(
     async (challenge) => {
       if (!challenge) return;
@@ -166,7 +162,7 @@ function App() {
           className={`app-tab ${activeTab === "editor" ? "active" : ""}`}
           onClick={() => setActiveTab("editor")}
         >
-          🧩 Editor
+          Editor
         </button>
         <button
           role="tab"
@@ -174,17 +170,14 @@ function App() {
           className={`app-tab ${activeTab === "challenges" ? "active" : ""}`}
           onClick={() => setActiveTab("challenges")}
         >
-          🏆 Desafíos
+          Desafios
           {completedIds.length > 0 && (
             <span className="app-tab-badge">{completedIds.length}</span>
           )}
         </button>
       </div>
 
-      {/* Contenido del tab: Editor
-          Importante: el editor siempre está montado (aún cuando el tab activo
-          es "challenges") porque Blockly necesita permanecer inicializado.
-          Lo ocultamos con CSS cuando no es el tab activo. */}
+      {/* Contenido del tab: Editor - siempre montado para preservar Blockly */}
       <div
         className={`app-tab-panel ${
           activeTab === "editor" ? "active" : "inactive"
@@ -206,7 +199,7 @@ function App() {
         <OutputConsole backendResponse={backendResponse} />
       </div>
 
-      {/* Contenido del tab: Desafíos */}
+      {/* Contenido del tab: Desafios */}
       {activeTab === "challenges" && (
         <div className="app-tab-panel active">
           <ChallengesSection
@@ -221,7 +214,7 @@ function App() {
         </div>
       )}
 
-      {/* Modal flotante del desafío activo — se renderiza por encima del editor */}
+      {/* Modal flotante del desafio activo - se renderiza por encima del editor */}
       {activeChallenge && (
         <ChallengeModal
           apiUrl={API_URL}

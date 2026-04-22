@@ -99,7 +99,7 @@ const BlocksEditor = ({ updateCode, isLoading, setIsLoading }) => {
   // TODO: hacerlo de una mejor manera, en donde corresponda, esperando que cargue
   // el csv default por completo y terminen de cargarse las variables de csv también.
   useEffect(() => {
-    if (shouldLoadDefaultWorkspace) {
+    if (shouldLoadDefaultWorkspace && !isLoading) {
       BlocksService.loadDefaultWorkspace(false);
       setShouldLoadDefaultWorkspace(false);
     }
