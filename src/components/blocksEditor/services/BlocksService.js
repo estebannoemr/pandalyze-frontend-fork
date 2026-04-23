@@ -85,8 +85,30 @@ const BlocksService = {
   },
 
   // Se dispara cuando el usuario guarda un Csv
-  onCsvUpload(csvData) {
-    if (csvData) {this.csvsData.push(csvData);}
+  // autoAdd: si es true, crea un bloque read_csv en el workspace automáticamente
+  onCsvUpload(csvData, autoAdd = false) {
+    if (csvData) {
+      this.csvsData.push(csvData);
+      if (autoAdd) {
+        this.addReadCsvBlockToWorkspace();
+      }
+    }
+  },
+
+  addReadCsvBlockToWorkspace() {
+    const workspace = Blockly.getMainWorkspace();
+    if (!workspace) return;
+
+    const block = workspace.newBlock("read_csv");
+    block.initSvg();
+    block.render();
+
+    // Posicionar en un lugar visible del workspace
+    const metrics = workspace.getMetrics();
+    block.moveBy(
+      metrics ? metrics.viewLeft + 20 : 20,
+      metrics ? metrics.viewTop + 20 : 20
+    );
   },
 
   onRefreshFlyout() {

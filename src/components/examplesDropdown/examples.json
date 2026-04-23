@@ -1,6 +1,6 @@
 {
   "000": {
-    "title": "Lagos con superficie mayor a 100km²",
+    "title": "Lagos con superficie mayor a 100km\u00b2",
     "path": "examples/superficie mayor 100km2.pdlz"
   },
   "001": {
@@ -8,15 +8,15 @@
     "path": "examples/variable hola mundo.pdlz"
   },
   "002": {
-    "title": "Gráfico de dispersión",
+    "title": "Gr\u00e1fico de dispersi\u00f3n",
     "path": "examples/grafico de dispersion.pdlz"
   },
   "003": {
-    "title": "Gráfico de barras",
+    "title": "Gr\u00e1fico de barras",
     "path": "examples/grafico de barras.pdlz"
   },
   "004": {
-    "title": "Ver apariciones únicas de una columna",
+    "title": "Ver apariciones \u00fanicas de una columna",
     "path": "examples/ver unicos.pdlz"
   },
   "005": {

@@ -45,7 +45,7 @@ export async function uploadCsvFile(file, apiUrl) {
     id: jsonData.csvId,
     filename: jsonData?.fileName,
     columnsNames: jsonData?.columnsNames,
-  });
+  }, true);
 
   return {
     csvId: jsonData.csvId,

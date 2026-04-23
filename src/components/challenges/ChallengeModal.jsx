@@ -178,7 +178,7 @@ const ChallengeModal = ({
           {csvStatus === "ready" && (
             <div className="challenge-modal-dataset">
               ✅ Dataset <strong>{challenge.csv_filename}</strong> cargado y
-              disponible en el bloque <em>"leer csv"</em>.
+              disponible. Se agregó un bloque <em>"read_csv"</em> al workspace.
             </div>
           )}
           {csvStatus === "error" && (
