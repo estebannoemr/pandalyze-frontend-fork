@@ -1,5 +1,8 @@
 // Wrapper centralizado para las llamadas al backend del módulo de desafíos.
 // Mantiene la UI desacoplada de detalles de fetch y manejo de errores.
+// Todas las llamadas usan authFetch para inyectar el JWT automáticamente.
+
+import { authFetch } from "../../auth/authFetch";
 
 async function handleResponse(response) {
   if (!response.ok) {
@@ -16,30 +19,42 @@ async function handleResponse(response) {
 }
 
 export async function getChallenges(apiUrl) {
-  const response = await fetch(`${apiUrl}/challenges`);
+  const response = await authFetch(`${apiUrl}/challenges`);
   return handleResponse(response);
 }
 
 export async function getChallengeCsv(apiUrl, challengeId) {
-  const response = await fetch(`${apiUrl}/challenges/${challengeId}/csv`);
+  const response = await authFetch(`${apiUrl}/challenges/${challengeId}/csv`);
   return handleResponse(response);
 }
 
 export async function validateChallenge(apiUrl, challengeId, output) {
-  const response = await fetch(`${apiUrl}/challenges/${challengeId}/validate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ output: output || "" }),
-  });
+  const response = await authFetch(
+    `${apiUrl}/challenges/${challengeId}/validate`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ output: output || "" }),
+    }
+  );
   return handleResponse(response);
 }
 
 export async function getChallengeSolution(apiUrl, challengeId) {
-  const response = await fetch(`${apiUrl}/challenges/${challengeId}/solution`);
+  const response = await authFetch(
+    `${apiUrl}/challenges/${challengeId}/solution`
+  );
   return handleResponse(response);
 }
 
 export async function getGamificationStatus(apiUrl) {
-  const response = await fetch(`${apiUrl}/challenges/gamification/status`);
+  const response = await authFetch(
+    `${apiUrl}/challenges/gamification/status`
+  );
+  return handleResponse(response);
+}
+
+export async function getTeacherStudents(apiUrl) {
+  const response = await authFetch(`${apiUrl}/teacher/students`);
   return handleResponse(response);
 }

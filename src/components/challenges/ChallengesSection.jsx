@@ -6,10 +6,6 @@ import {
   getGamificationStatus,
 } from "./challengesApi";
 
-// Claves para persistencia en localStorage
-const LS_COMPLETED = "pandalyze_completed";
-const LS_POINTS = "pandalyze_points";
-
 // Colores y etiquetas por dificultad
 const DIFFICULTY_LABELS = {
   basico: "Básico",
@@ -43,28 +39,6 @@ const isUnlocked = (challenge, completedIds, allChallenges) => {
   return false;
 };
 
-// Lee el estado inicial guardado en localStorage (modo offline/arranque rápido)
-const readLocalStatus = () => {
-  try {
-    const completedRaw = localStorage.getItem(LS_COMPLETED);
-    const pointsRaw = localStorage.getItem(LS_POINTS);
-    const completed = completedRaw ? JSON.parse(completedRaw) : [];
-    const points = pointsRaw ? parseInt(pointsRaw, 10) : 0;
-    return { completed: Array.isArray(completed) ? completed : [], points };
-  } catch (_) {
-    return { completed: [], points: 0 };
-  }
-};
-
-const writeLocalStatus = (completed, points) => {
-  try {
-    localStorage.setItem(LS_COMPLETED, JSON.stringify(completed || []));
-    localStorage.setItem(LS_POINTS, String(points || 0));
-  } catch (_) {
-    // si localStorage no está disponible, no bloqueamos la app
-  }
-};
-
 const ChallengesSection = ({
   apiUrl,
   activeChallenge,
@@ -92,7 +66,7 @@ const ChallengesSection = ({
   });
 
   // ------------------------------------------------------------------
-  // Carga inicial: primero pinta con localStorage, luego refresca con backend
+  // Carga inicial: el backend es la única fuente de verdad
   // ------------------------------------------------------------------
   const refreshStatus = useCallback(async () => {
     try {
@@ -101,24 +75,13 @@ const ChallengesSection = ({
       if (Array.isArray(status.completed_challenges)) {
         setCompletedIds(status.completed_challenges);
         setTotalPoints(status.total_points || 0);
-        writeLocalStatus(status.completed_challenges, status.total_points || 0);
       }
     } catch (e) {
-      // En caso de fallo de servidor, seguimos con lo que haya en memoria/localStorage
       console.warn("No se pudo actualizar el estado de gamificación:", e);
     }
   }, [apiUrl, setCompletedIds, setTotalPoints]);
 
   useEffect(() => {
-    // pintar inmediatamente con lo que haya en localStorage
-    const local = readLocalStatus();
-    if (completedIds.length === 0 && local.completed.length > 0) {
-      setCompletedIds(local.completed);
-    }
-    if (totalPoints === 0 && local.points > 0) {
-      setTotalPoints(local.points);
-    }
-
     let cancelled = false;
     (async () => {
       try {

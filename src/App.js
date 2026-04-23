@@ -6,17 +6,21 @@ import WelcomeModal from "./components/welcomeModal/WelcomeModal";
 import OutputConsole from "./components/outputConsole/OutputConsole";
 import ChallengesSection from "./components/challenges/ChallengesSection";
 import ChallengeModal from "./components/challenges/ChallengeModal";
+import TeacherDashboard from "./components/teacher/TeacherDashboard";
+import AdminDashboard from "./components/admin/AdminDashboard";
+import StatsDashboard from "./components/stats/StatsDashboard";
 import { getChallengeCsv } from "./components/challenges/challengesApi";
 import {
   uploadCsvFile,
   csvStringToFile,
 } from "./components/challenges/challengesCsvUploader";
-
-const LS_COMPLETED = "pandalyze_completed";
-const LS_POINTS = "pandalyze_points";
+import { useAuth } from "./auth/AuthContext";
+import AuthPage from "./auth/AuthPage";
 
 function App() {
   const API_URL = process.env.REACT_APP_API_URL;
+
+  const { user, isAuthenticated, bootstrapping, logout } = useAuth();
 
   const [frontendCode, setFrontendCode] = useState("");
   const [backendCode, setBackendCode] = useState("");
@@ -25,33 +29,15 @@ function App() {
     useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Sistema de tabs: "editor" | "challenges"
   const [activeTab, setActiveTab] = useState("editor");
 
-  // Desafío actualmente activo (modal abierto sobre el editor)
   const [activeChallenge, setActiveChallenge] = useState(null);
   const [challengeCsvStatus, setChallengeCsvStatus] = useState("idle");
   const [challengeCsvError, setChallengeCsvError] = useState("");
 
-  // Estado de gamificación a nivel app (persistido en localStorage)
-  const [completedIds, setCompletedIds] = useState(() => {
-    try {
-      const raw = localStorage.getItem(LS_COMPLETED);
-      return raw ? JSON.parse(raw) : [];
-    } catch (_) {
-      return [];
-    }
-  });
-  const [totalPoints, setTotalPoints] = useState(() => {
-    try {
-      const raw = localStorage.getItem(LS_POINTS);
-      return raw ? parseInt(raw, 10) : 0;
-    } catch (_) {
-      return 0;
-    }
-  });
+  const [completedIds, setCompletedIds] = useState([]);
+  const [totalPoints, setTotalPoints] = useState(0);
 
-  // Health check periódico para mantener el backend despierto
   const fetchHealthCheck = async () => {
     try {
       const response = await fetch(API_URL + "/healthCheck", { timeout: 5000 });
@@ -72,6 +58,22 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCompletedIds([]);
+      setTotalPoints(0);
+      setActiveChallenge(null);
+      setActiveTab((prev) =>
+        prev === "challenges" ||
+        prev === "teacher" ||
+        prev === "admin" ||
+        prev === "stats"
+          ? "editor"
+          : prev
+      );
+    }
+  }, [isAuthenticated]);
+
   const updateCode = (frontendCode, backendCode) => {
     setFrontendCode(frontendCode);
     setBackendCode(backendCode);
@@ -80,10 +82,6 @@ function App() {
   const handleCloseInitialAlert = () => setShowInitialInstructionsAlert(false);
   const handleOpenInitialAlert = () => setShowInitialInstructionsAlert(true);
 
-  // Inicio de un desafío:
-  //   1. pedimos el CSV al backend
-  //   2. lo subimos al backend con /uploadCsv y lo registramos en BlocksService
-  //   3. abrimos el modal y cambiamos al tab del editor
   const handleStartChallenge = useCallback(
     async (challenge) => {
       if (!challenge) return;
@@ -100,7 +98,7 @@ function App() {
         setChallengeCsvStatus("ready");
       } catch (e) {
         setChallengeCsvStatus("error");
-        setChallengeCsvError(e?.message || "Error desconocido");
+        setChallengeCsvError((e && e.message) || "Error desconocido");
       }
     },
     [API_URL]
@@ -112,26 +110,27 @@ function App() {
     setChallengeCsvError("");
   };
 
-  // Callback cuando el modal informa un desafío aprobado
   const handleMarkCompleted = (challengeId, pointsEarned = 0) => {
-    setCompletedIds((prev) => {
-      if (prev.includes(challengeId)) return prev;
-      const next = [...prev, challengeId];
-      try {
-        localStorage.setItem(LS_COMPLETED, JSON.stringify(next));
-      } catch (_) {}
-      return next;
-    });
+    setCompletedIds((prev) =>
+      prev.includes(challengeId) ? prev : [...prev, challengeId]
+    );
     if (pointsEarned > 0) {
-      setTotalPoints((prev) => {
-        const next = prev + pointsEarned;
-        try {
-          localStorage.setItem(LS_POINTS, String(next));
-        } catch (_) {}
-        return next;
-      });
+      setTotalPoints((prev) => prev + pointsEarned);
     }
   };
+
+  if (bootstrapping) {
+    return (
+      <div className="app-bootstrapping">
+        <p>Cargando...</p>
+      </div>
+    );
+  }
+
+  const isTeacher = user && user.role === "docente";
+  const isAdmin = user && user.role === "admin";
+
+  const showAuthOverlay = activeTab === "auth" && !isAuthenticated;
 
   return (
     <div className="app-container">
@@ -149,17 +148,42 @@ function App() {
         <div className="title-container">
           <span className="title">Pandalyze: </span>
           <span className="subtitle">
-            aprender Ciencia de Datos con programación en bloques
+            aprender Ciencia de Datos con programacion en bloques
           </span>
+        </div>
+        <div className="app-user-box">
+          {isAuthenticated ? (
+            <>
+              <span className="app-user-email">{user && user.email}</span>
+              <span className="app-user-role">
+                {isAdmin ? "Admin" : isTeacher ? "Docente" : "Alumno"}
+              </span>
+              <button
+                className="btn btn-outline-secondary btn-sm"
+                onClick={logout}
+              >
+                Cerrar sesion
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="app-user-role">Invitado</span>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => setActiveTab("auth")}
+              >
+                Iniciar sesion
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Tabs de navegación */}
       <div className="app-tabs" role="tablist">
         <button
           role="tab"
           aria-selected={activeTab === "editor"}
-          className={`app-tab ${activeTab === "editor" ? "active" : ""}`}
+          className={"app-tab " + (activeTab === "editor" ? "active" : "")}
           onClick={() => setActiveTab("editor")}
         >
           Editor
@@ -167,21 +191,58 @@ function App() {
         <button
           role="tab"
           aria-selected={activeTab === "challenges"}
-          className={`app-tab ${activeTab === "challenges" ? "active" : ""}`}
-          onClick={() => setActiveTab("challenges")}
+          className={"app-tab " + (activeTab === "challenges" ? "active" : "")}
+          onClick={() => {
+            if (!isAuthenticated) {
+              setActiveTab("auth");
+              return;
+            }
+            setActiveTab("challenges");
+          }}
+          title={!isAuthenticated ? "Inicia sesion para acceder" : undefined}
         >
           Desafios
-          {completedIds.length > 0 && (
+          {!isAuthenticated && <span className="app-tab-lock">LOCK</span>}
+          {isAuthenticated && completedIds.length > 0 && (
             <span className="app-tab-badge">{completedIds.length}</span>
           )}
         </button>
+        {isTeacher && (
+          <button
+            role="tab"
+            aria-selected={activeTab === "teacher"}
+            className={"app-tab " + (activeTab === "teacher" ? "active" : "")}
+            onClick={() => setActiveTab("teacher")}
+          >
+            Mis alumnos
+          </button>
+        )}
+        {isAdmin && (
+          <button
+            role="tab"
+            aria-selected={activeTab === "admin"}
+            className={"app-tab " + (activeTab === "admin" ? "active" : "")}
+            onClick={() => setActiveTab("admin")}
+          >
+            Admin
+          </button>
+        )}
+        {(isTeacher || isAdmin) && (
+          <button
+            role="tab"
+            aria-selected={activeTab === "stats"}
+            className={"app-tab " + (activeTab === "stats" ? "active" : "")}
+            onClick={() => setActiveTab("stats")}
+          >
+            Estadisticas
+          </button>
+        )}
       </div>
 
-      {/* Contenido del tab: Editor - siempre montado para preservar Blockly */}
       <div
-        className={`app-tab-panel ${
-          activeTab === "editor" ? "active" : "inactive"
-        }`}
+        className={
+          "app-tab-panel " + (activeTab === "editor" ? "active" : "inactive")
+        }
       >
         <div className="editors-flex-container">
           <BlocksEditor
@@ -199,8 +260,7 @@ function App() {
         <OutputConsole backendResponse={backendResponse} />
       </div>
 
-      {/* Contenido del tab: Desafios */}
-      {activeTab === "challenges" && (
+      {activeTab === "challenges" && isAuthenticated && (
         <div className="app-tab-panel active">
           <ChallengesSection
             apiUrl={API_URL}
@@ -214,7 +274,30 @@ function App() {
         </div>
       )}
 
-      {/* Modal flotante del desafio activo - se renderiza por encima del editor */}
+      {activeTab === "teacher" && isTeacher && (
+        <div className="app-tab-panel active">
+          <TeacherDashboard apiUrl={API_URL} classCode={user && user.class_code} />
+        </div>
+      )}
+
+      {activeTab === "admin" && isAdmin && (
+        <div className="app-tab-panel active">
+          <AdminDashboard apiUrl={API_URL} />
+        </div>
+      )}
+
+      {activeTab === "stats" && (isTeacher || isAdmin) && (
+        <div className="app-tab-panel active">
+          <StatsDashboard apiUrl={API_URL} isAdmin={isAdmin} />
+        </div>
+      )}
+
+      {showAuthOverlay && (
+        <div className="app-tab-panel active">
+          <AuthPage onCancel={() => setActiveTab("editor")} />
+        </div>
+      )}
+
       {activeChallenge && (
         <ChallengeModal
           apiUrl={API_URL}

@@ -2,6 +2,7 @@ import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import "./styles.css";
+import { authFetch } from "../../auth/authFetch";
 
 const PythonEditor = ({
   frontendCode,
@@ -13,7 +14,7 @@ const PythonEditor = ({
 
   const handleSubmit = () => {
     const pythonCode = backendCode;
-    fetch(`${API_URL}/runPythonCode`, {
+    authFetch(`${API_URL}/runPythonCode`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

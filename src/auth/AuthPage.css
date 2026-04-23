@@ -1,0 +1,126 @@
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #b9e2f7;
+  padding: 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+  padding: 28px;
+  font-family: arial;
+  color: #5f6565;
+}
+
+.auth-title {
+  text-align: center;
+  margin: 0 0 6px;
+  color: #0d6efd;
+}
+
+.auth-subtitle {
+  text-align: center;
+  margin: 0 0 18px;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.auth-optional {
+  color: #8a9199;
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+.auth-cancel {
+  margin-top: 4px;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid #0d6efd;
+  margin-bottom: 18px;
+}
+
+.auth-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 10px 0;
+  font-weight: 600;
+  color: #5f6565;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+}
+
+.auth-tab.active {
+  background: #0d6efd;
+  color: #fff;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.auth-form input,
+.auth-form select {
+  padding: 8px 10px;
+  border: 1px solid #ccd2d8;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.auth-form input:focus,
+.auth-form select:focus {
+  outline: none;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+}
+
+.auth-error {
+  background: #fde2e2;
+  color: #b02a37;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.auth-hint {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.auth-submit {
+  margin-top: 6px;
+}
+
+.auth-class-code {
+  font-family: "Courier New", monospace;
+  font-size: 2rem;
+  font-weight: bold;
+  letter-spacing: 4px;
+  text-align: center;
+  background: #e7f1ff;
+  color: #0d6efd;
+  padding: 14px;
+  border-radius: 10px;
+  margin: 16px 0;
+}

@@ -1,0 +1,92 @@
+.teacher-dashboard {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  font-family: arial;
+  color: #5f6565;
+}
+
+.teacher-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.teacher-header h2 {
+  margin: 0;
+  color: #0d6efd;
+}
+
+.teacher-class-code-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e7f1ff;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.teacher-class-code-label {
+  font-weight: 600;
+}
+
+.teacher-class-code-value {
+  font-family: "Courier New", monospace;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #0d6efd;
+  font-size: 1.1rem;
+}
+
+.teacher-empty {
+  font-style: italic;
+  color: #6c757d;
+}
+
+.teacher-error {
+  background: #fde2e2;
+  color: #b02a37;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 8px 0;
+}
+
+.teacher-table-wrapper {
+  overflow-x: auto;
+}
+
+.teacher-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.teacher-table th,
+.teacher-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e9ee;
+}
+
+.teacher-table th {
+  background: #f5f8fb;
+  font-weight: 600;
+  color: #0d6efd;
+}
+
+.teacher-level-badge {
+  display: inline-block;
+  background: #0d6efd;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.teacher-points {
+  font-weight: bold;
+  color: #28a745;
+}

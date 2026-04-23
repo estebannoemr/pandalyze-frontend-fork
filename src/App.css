@@ -97,6 +97,11 @@
   text-align: center;
 }
 
+.app-tab-lock {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
 /* Paneles de tab */
 .app-tab-panel.active {
   display: block;
@@ -105,4 +110,44 @@
 /* Mantenemos el editor montado pero oculto para que Blockly siga inicializado */
 .app-tab-panel.inactive {
   display: none;
+}
+
+/* ============================================================
+   User box (header)
+   ============================================================ */
+
+.app-user-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffffcc;
+  padding: 6px 12px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.app-user-email {
+  font-weight: 600;
+  color: #0d6efd;
+  font-size: 0.95rem;
+}
+
+.app-user-role {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #e7f1ff;
+  color: #0d6efd;
+}
+
+.app-bootstrapping {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #b9e2f7;
+  font-family: arial;
+  color: #5f6565;
+  font-size: 1.2rem;
 }

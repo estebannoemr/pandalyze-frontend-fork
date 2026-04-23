@@ -5,6 +5,7 @@ import defaultCsv from "./default.csv";
 import ErrorAlert from "../alerts/errorAlert/ErrorAlert";
 import SuccessAlert from "../alerts/successAlert/SuccessAlert";
 import WarningAlert from "../alerts/warningAlert/WarningAlert";
+import { authFetch } from "../../auth/authFetch";
 
 const CsvUploader = ({ isLoading, setIsLoading }) => {
   const [csvFile, setCsvFile] = useState(null);
@@ -82,7 +83,7 @@ const CsvUploader = ({ isLoading, setIsLoading }) => {
       const formData = new FormData();
       formData.append("csv", file);
 
-      fetch(`${API_URL}/uploadCsv`, {
+      authFetch(`${API_URL}/uploadCsv`, {
         method: "POST",
         body: formData,
       })

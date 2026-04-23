@@ -4,6 +4,7 @@
 // módulo de desafíos al iniciar un reto.
 
 import BlocksService from "../blocksEditor/services/BlocksService";
+import { authFetch } from "../../auth/authFetch";
 
 /**
  * Sube un archivo CSV al endpoint /uploadCsv y lo registra en el BlocksService
@@ -21,7 +22,7 @@ export async function uploadCsvFile(file, apiUrl) {
   const formData = new FormData();
   formData.append("csv", file);
 
-  const response = await fetch(`${apiUrl}/uploadCsv`, {
+  const response = await authFetch(`${apiUrl}/uploadCsv`, {
     method: "POST",
     body: formData,
   });
