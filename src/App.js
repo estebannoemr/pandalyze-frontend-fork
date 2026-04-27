@@ -16,6 +16,7 @@ import {
 } from "./components/challenges/challengesCsvUploader";
 import { useAuth } from "./auth/AuthContext";
 import AuthPage from "./auth/AuthPage";
+import ProfileModal from "./auth/ProfileModal";
 
 function App() {
   const API_URL = process.env.REACT_APP_API_URL;
@@ -25,11 +26,28 @@ function App() {
   const [frontendCode, setFrontendCode] = useState("");
   const [backendCode, setBackendCode] = useState("");
   const [backendResponse, setBackendResponse] = useState({});
+  // Para usuarios autenticados: key por id. Para invitados: key genérica.
+  const tutorialSeenKey = user ? `tutorial_seen_${user.id}` : "tutorial_seen_guest";
   const [showInitialInstructionsAlert, setShowInitialInstructionsAlert] =
-    useState(true);
+    useState(false);
+
+  // Mostrar tutorial automáticamente solo si nunca lo vio (por usuario o como invitado).
+  // Se ejecuta cuando cambia tutorialSeenKey, es decir al cargar o al autenticarse.
+  useEffect(() => {
+    if (bootstrapping) return;
+    try {
+      if (!localStorage.getItem(tutorialSeenKey)) {
+        setShowInitialInstructionsAlert(true);
+      }
+    } catch (_) {
+      setShowInitialInstructionsAlert(true);
+    }
+  }, [tutorialSeenKey, bootstrapping]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState("editor");
+
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const [activeChallenge, setActiveChallenge] = useState(null);
   const [challengeCsvStatus, setChallengeCsvStatus] = useState("idle");
@@ -90,7 +108,12 @@ function App() {
     setBackendCode(backendCode);
   };
 
-  const handleCloseInitialAlert = () => setShowInitialInstructionsAlert(false);
+  const handleCloseInitialAlert = () => {
+    setShowInitialInstructionsAlert(false);
+    if (tutorialSeenKey) {
+      try { localStorage.setItem(tutorialSeenKey, "1"); } catch (_) {}
+    }
+  };
   const handleOpenInitialAlert = () => setShowInitialInstructionsAlert(true);
 
   const handleStartChallenge = useCallback(
@@ -183,6 +206,13 @@ function App() {
               <span className="app-user-role">
                 {isAdmin ? "Admin" : isTeacher ? "Docente" : "Alumno"}
               </span>
+              <button
+                className="btn btn-outline-primary btn-sm"
+                onClick={() => setShowProfileModal(true)}
+                title="Editar perfil"
+              >
+                Mi perfil
+              </button>
               <button
                 className="btn btn-outline-secondary btn-sm"
                 onClick={logout}
@@ -321,6 +351,40 @@ function App() {
         <div className="app-tab-panel active">
           <AuthPage onCancel={() => setActiveTab("editor")} />
         </div>
+      )}
+
+      {showProfileModal && (
+        <ProfileModal onClose={() => setShowProfileModal(false)} />
+      )}
+
+      {activeChallenge && (
+        <ChallengeModal
+          apiUrl={API_URL}
+          challenge={activeChallenge}
+          backendResponse={backendResponse}
+          csvStatus={challengeCsvStatus}
+          csvError={challengeCsvError}
+          onClose={handleCloseChallenge}
+          onMarkCompleted={handleMarkCompleted}
+        />
+      )}
+    </div>
+  );
+}
+
+export default App;
+ashboard apiUrl={API_URL} isAdmin={isAdmin} />
+        </div>
+      )}
+
+      {showAuthOverlay && (
+        <div className="app-tab-panel active">
+          <AuthPage onCancel={() => setActiveTab("editor")} />
+        </div>
+      )}
+
+      {showProfileModal && (
+        <ProfileModal onClose={() => setShowProfileModal(false)} />
       )}
 
       {activeChallenge && (
