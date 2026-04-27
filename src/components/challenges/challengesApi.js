@@ -28,13 +28,23 @@ export async function getChallengeCsv(apiUrl, challengeId) {
   return handleResponse(response);
 }
 
-export async function validateChallenge(apiUrl, challengeId, output) {
+export async function validateChallenge(
+  apiUrl,
+  challengeId,
+  output,
+  { startTime = null, activeSeconds = null } = {}
+) {
+  const body = { output: output || "" };
+  if (startTime) body.start_time = startTime;
+  if (typeof activeSeconds === "number" && Number.isFinite(activeSeconds)) {
+    body.active_seconds = Math.max(0, Math.floor(activeSeconds));
+  }
   const response = await authFetch(
     `${apiUrl}/challenges/${challengeId}/validate`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ output: output || "" }),
+      body: JSON.stringify(body),
     }
   );
   return handleResponse(response);

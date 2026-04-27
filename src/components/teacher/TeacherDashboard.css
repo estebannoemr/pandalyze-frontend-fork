@@ -90,3 +90,10 @@
   font-weight: bold;
   color: #28a745;
 }
+
+.teacher-timing {
+  font-family: "Courier New", monospace;
+  font-size: 0.88rem;
+  color: #495057;
+  white-space: nowrap;
+}

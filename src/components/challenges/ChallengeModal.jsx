@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   validateChallenge,
   getChallengeSolution,
@@ -8,6 +8,47 @@ const DIFFICULTY_LABELS = {
   basico: "Básico",
   intermedio: "Intermedio",
   avanzado: "Avanzado",
+};
+
+// Helpers de timing oculto. start_time se fija cuando el alumno hace click
+// en "Comenzar" (en App.js). active_seconds se acumula a cada unmount del
+// modal, así si el alumno cierra y vuelve a abrir el contador no se pierde.
+const readStartTime = (challengeId) => {
+  try {
+    return localStorage.getItem(`challenge_start_${challengeId}`) || null;
+  } catch (_) {
+    return null;
+  }
+};
+
+const readActiveSeconds = (challengeId) => {
+  try {
+    const raw = localStorage.getItem(`challenge_active_${challengeId}`);
+    const n = parseInt(raw || "0", 10);
+    return Number.isFinite(n) && n >= 0 ? n : 0;
+  } catch (_) {
+    return 0;
+  }
+};
+
+const writeActiveSeconds = (challengeId, value) => {
+  try {
+    localStorage.setItem(
+      `challenge_active_${challengeId}`,
+      String(Math.max(0, Math.floor(value)))
+    );
+  } catch (_) {
+    // localStorage puede no estar disponible; no bloquea la experiencia.
+  }
+};
+
+const clearTimingStorage = (challengeId) => {
+  try {
+    localStorage.removeItem(`challenge_start_${challengeId}`);
+    localStorage.removeItem(`challenge_active_${challengeId}`);
+  } catch (_) {
+    // ignore
+  }
 };
 
 // Modal flotante que acompaña al usuario mientras resuelve un desafío.
@@ -32,6 +73,11 @@ const ChallengeModal = ({
   const [lastVerifiedOutput, setLastVerifiedOutput] = useState(null);
   const [minimized, setMinimized] = useState(false);
 
+  // Tracking de tiempo activo: cada vez que el modal se monta para un
+  // desafío guardamos el instante para acumular al desmontarse.
+  const sessionStartRef = useRef(null);
+  const challengeIdRef = useRef(challenge?.id || null);
+
   // Resetear estado cuando cambia el desafío
   useEffect(() => {
     setAttempts(0);
@@ -42,6 +88,24 @@ const ChallengeModal = ({
     setSolutionCode("");
     setResult(null);
     setLastVerifiedOutput(null);
+  }, [challenge?.id]);
+
+  // Acumular active_seconds al desmontar/cambiar de desafío.
+  useEffect(() => {
+    const cid = challenge?.id;
+    challengeIdRef.current = cid;
+    sessionStartRef.current = Date.now();
+    return () => {
+      if (cid == null || sessionStartRef.current == null) return;
+      const elapsed = Math.max(
+        0,
+        Math.floor((Date.now() - sessionStartRef.current) / 1000)
+      );
+      if (elapsed > 0) {
+        writeActiveSeconds(cid, readActiveSeconds(cid) + elapsed);
+      }
+      sessionStartRef.current = null;
+    };
   }, [challenge?.id]);
 
   // Output actualmente visible en la consola (para habilitar "Verificar")
@@ -62,17 +126,30 @@ const ChallengeModal = ({
   const handleVerify = async () => {
     if (!canVerify || !challenge) return;
     setPhase("validating");
+    // Snapshot de timing al momento de verificar.
+    const startTime = readStartTime(challenge.id);
+    const storedActive = readActiveSeconds(challenge.id);
+    const sessionElapsed =
+      sessionStartRef.current != null
+        ? Math.max(0, Math.floor((Date.now() - sessionStartRef.current) / 1000))
+        : 0;
+    const activeSeconds = storedActive + sessionElapsed;
     try {
       const response = await validateChallenge(
         apiUrl,
         challenge.id,
-        currentOutput || ""
+        currentOutput || "",
+        { startTime, activeSeconds }
       );
       setResult(response);
       setLastVerifiedOutput(currentOutput);
       setAttempts((a) => a + 1);
       if (response.passed) {
         setPhase("passed");
+        // Al aprobar, limpiamos los contadores: un futuro reintento
+        // (si se permitiera) empezaría de cero.
+        clearTimingStorage(challenge.id);
+        sessionStartRef.current = null;
         if (typeof onMarkCompleted === "function") {
           onMarkCompleted(challenge.id, response.points_earned || 0, response.first_try);
         }

@@ -12,6 +12,26 @@ function formatDate(iso) {
   }
 }
 
+// Formatea segundos como "Xm Ys" (o "—" si no hay dato). Mantiene legibilidad
+// sin exponer precisión innecesaria; el dato es solo para docentes/admin.
+function formatDuration(seconds) {
+  if (seconds == null || !Number.isFinite(Number(seconds))) return "—";
+  const total = Math.max(0, Math.floor(Number(seconds)));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
+// Devuelve "primero → último" para una dificultad, o "—" si no hay datos.
+function renderTimingPair(timing, diff) {
+  const t = timing?.[diff];
+  if (!t || (t.first == null && t.last == null)) return "—";
+  return `${formatDuration(t.first)} → ${formatDuration(t.last)}`;
+}
+
 export default function TeacherDashboard({ apiUrl, classCode }) {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +88,15 @@ export default function TeacherDashboard({ apiUrl, classCode }) {
                 <th>Puntos</th>
                 <th>Desafíos completados</th>
                 <th>Último acceso</th>
+                <th title="Duración del primer → último desafío básico aprobado">
+                  Tiempo básico
+                </th>
+                <th title="Duración del primer → último desafío intermedio aprobado">
+                  Tiempo intermedio
+                </th>
+                <th title="Duración del primer → último desafío avanzado aprobado">
+                  Tiempo avanzado
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -82,6 +111,15 @@ export default function TeacherDashboard({ apiUrl, classCode }) {
                   <td className="teacher-points">{s.total_points}</td>
                   <td>{s.completed_count}</td>
                   <td>{formatDate(s.last_seen_at)}</td>
+                  <td className="teacher-timing">
+                    {renderTimingPair(s.timing, "basico")}
+                  </td>
+                  <td className="teacher-timing">
+                    {renderTimingPair(s.timing, "intermedio")}
+                  </td>
+                  <td className="teacher-timing">
+                    {renderTimingPair(s.timing, "avanzado")}
+                  </td>
                 </tr>
               ))}
             </tbody>
