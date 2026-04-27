@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import "./ChallengesSection.css";
 import GamificationProfile from "./GamificationProfile";
+import Leaderboard from "./Leaderboard";
 import {
   getChallenges,
   getGamificationStatus,
@@ -163,6 +164,9 @@ const ChallengesSection = ({
         completedCount={completedIds.length}
         totalChallenges={challenges.length}
       />
+
+      {/* Leaderboard anónimo: visible para todos los usuarios autenticados */}
+      <Leaderboard apiUrl={apiUrl} />
 
       {/* Filtros */}
       <div className="challenges-filters">

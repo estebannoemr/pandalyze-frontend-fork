@@ -64,6 +64,11 @@ export async function getGamificationStatus(apiUrl) {
   return handleResponse(response);
 }
 
+export async function getLeaderboard(apiUrl) {
+  const response = await authFetch(`${apiUrl}/challenges/leaderboard`);
+  return handleResponse(response);
+}
+
 export async function getTeacherStudents(apiUrl) {
   const response = await authFetch(`${apiUrl}/teacher/students`);
   return handleResponse(response);
