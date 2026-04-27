@@ -113,6 +113,62 @@ export function AuthProvider({ children }) {
     setAuthError("");
   }, []);
 
+  // ---------------- Recuperación de contraseña ----------------
+  // Estos métodos no requieren JWT y por eso usan fetch directo.
+  // Devuelven el body del backend, o lanzan Error con el mensaje.
+  const forgotPassword = useCallback(
+    async (email) => {
+      const r = await fetch(API_URL + "/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: (email || "").trim().toLowerCase() }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        throw new Error((data && data.error) || "Error solicitando reset.");
+      }
+      return data;
+    },
+    [API_URL]
+  );
+
+  const resetPassword = useCallback(
+    async (token, newPassword) => {
+      const r = await fetch(API_URL + "/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, new_password: newPassword }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        throw new Error((data && data.error) || "Error reseteando contraseña.");
+      }
+      return data;
+    },
+    [API_URL]
+  );
+
+  // ---------------- Edición de perfil ----------------
+  // Requiere JWT, usa authFetch. Acepta un patch con cualquier subset de
+  // {current_password, new_password, class_code} y refresca el user local
+  // con la respuesta del backend.
+  const updateProfile = useCallback(
+    async (patch) => {
+      const r = await authFetch(API_URL + "/auth/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch || {}),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        throw new Error((data && data.error) || "Error actualizando perfil.");
+      }
+      if (data && data.user) setUser(data.user);
+      return data;
+    },
+    [API_URL]
+  );
+
   const value = useMemo(
     () => ({
       user,
@@ -123,8 +179,22 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
+      forgotPassword,
+      resetPassword,
+      updateProfile,
     }),
-    [user, token, bootstrapping, authError, login, register, logout]
+    [
+      user,
+      token,
+      bootstrapping,
+      authError,
+      login,
+      register,
+      logout,
+      forgotPassword,
+      resetPassword,
+      updateProfile,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
