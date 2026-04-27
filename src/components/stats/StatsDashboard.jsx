@@ -73,6 +73,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
   const byDifficulty = data ? data.by_difficulty || {} : {};
   const timeline = data ? data.timeline || [] : [];
   const summary = data ? data.summary || {} : {};
+  const timingAvg = data ? data.timing_avg || {} : {};
 
   // ---- Grafico 1: barras horizontales, desafios completados por alumno ----
   const completedChart = useMemo(() => {
@@ -188,6 +189,53 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
     };
   }, [timeline]);
 
+  // ---- Grafico 5: duracion promedio por dificultad (primer vs ultimo) ----
+  // Visible para docente/admin (este dashboard ya esta protegido por rol).
+  // Muestra si el tiempo baja con la practica: dos barras por dificultad
+  // (minutos promedio del primer desafio aprobado vs del ultimo).
+  const timingChart = useMemo(() => {
+    const keys = ["basico", "intermedio", "avanzado"];
+    const toMinutes = (s) =>
+      s == null ? null : Math.round((Number(s) / 60) * 10) / 10;
+    const firsts = keys.map((k) => toMinutes(timingAvg[k]?.first_avg_seconds));
+    const lasts = keys.map((k) => toMinutes(timingAvg[k]?.last_avg_seconds));
+    const labels = keys.map((k) => DIFFICULTY_LABELS[k]);
+    return {
+      data: [
+        {
+          type: "bar",
+          name: "Primer desafio",
+          x: labels,
+          y: firsts,
+          marker: { color: "#6f42c1" },
+          hovertemplate: "%{x} (primero): %{y} min<extra></extra>",
+        },
+        {
+          type: "bar",
+          name: "Ultimo desafio",
+          x: labels,
+          y: lasts,
+          marker: { color: "#20c997" },
+          hovertemplate: "%{x} (ultimo): %{y} min<extra></extra>",
+        },
+      ],
+      layout: {
+        title: {
+          text: "Tiempo promedio por dificultad (min)",
+          font: { size: 14 },
+        },
+        barmode: "group",
+        margin: { l: 40, r: 20, t: 40, b: 60 },
+        yaxis: { title: "Minutos" },
+        xaxis: { title: "Dificultad" },
+        height: 320,
+        paper_bgcolor: "transparent",
+        plot_bgcolor: "transparent",
+        showlegend: true,
+      },
+    };
+  }, [timingAvg]);
+
   const isEmpty = !loading && !error && perStudent.length === 0;
 
   return (
@@ -279,6 +327,15 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
                 <Plot
                   data={timelineChart.data}
                   layout={timelineChart.layout}
+                  config={{ displayModeBar: false, responsive: true }}
+                  style={{ width: "100%" }}
+                  useResizeHandler
+                />
+              </div>
+              <div className="stats-chart-card">
+                <Plot
+                  data={timingChart.data}
+                  layout={timingChart.layout}
                   config={{ displayModeBar: false, responsive: true }}
                   style={{ width: "100%" }}
                   useResizeHandler

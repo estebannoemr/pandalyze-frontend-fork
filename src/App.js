@@ -71,8 +71,19 @@ function App() {
           ? "editor"
           : prev
       );
+      return;
     }
-  }, [isAuthenticated]);
+    // Recién autenticado: si el usuario venía de la pantalla de login
+    // (activeTab === "auth"), lo enviamos a un tab sensato según su rol.
+    // Sin esto, el panel "auth" deja de renderizarse al pasar isAuthenticated
+    // a true y la pantalla queda en blanco hasta que el usuario clickea un tab.
+    setActiveTab((prev) => {
+      if (prev !== "auth") return prev;
+      if (user && user.role === "admin") return "admin";
+      if (user && user.role === "docente") return "teacher";
+      return "challenges";
+    });
+  }, [isAuthenticated, user]);
 
   const updateCode = (frontendCode, backendCode) => {
     setFrontendCode(frontendCode);
@@ -90,6 +101,20 @@ function App() {
       setChallengeCsvStatus("loading");
       setChallengeCsvError("");
       setActiveTab("editor");
+
+      // Timing oculto: registramos el momento exacto en que el alumno
+      // hizo click en "Comenzar". Se persiste en localStorage para que
+      // sobreviva al cierre del modal (wall clock sigue corriendo).
+      // Sólo se setea si no existe ya un start para este desafío,
+      // así un reopen del modal no resetea el contador.
+      try {
+        const key = `challenge_start_${challenge.id}`;
+        if (!localStorage.getItem(key)) {
+          localStorage.setItem(key, new Date().toISOString());
+        }
+      } catch (_) {
+        // localStorage puede fallar en modo privado; no es crítico.
+      }
 
       try {
         const csvInfo = await getChallengeCsv(API_URL, challenge.id);
