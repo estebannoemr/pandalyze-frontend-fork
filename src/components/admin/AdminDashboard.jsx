@@ -28,18 +28,35 @@ export default function AdminDashboard({ apiUrl }) {
   const [q, setQ] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [actionError, setActionError] = useState("");
+  // Paginación: la API limita per_page a 100; 20 es un sweet spot legible.
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const teachers = useMemo(
     () => users.filter((u) => u.role === "docente"),
     [users]
   );
 
-  const load = async (query = q, role = roleFilter) => {
+  const load = async (
+    query = q,
+    role = roleFilter,
+    pageOverride = page,
+    perPageOverride = perPage
+  ) => {
     setLoading(true);
     setError("");
     try {
-      const data = await adminListUsers(apiUrl, { q: query, role });
+      const data = await adminListUsers(apiUrl, {
+        q: query,
+        role,
+        page: pageOverride,
+        perPage: perPageOverride,
+      });
       setUsers(data.users || []);
+      setTotal(typeof data.total === "number" ? data.total : 0);
+      setTotalPages(typeof data.pages === "number" ? data.pages : 1);
     } catch (e) {
       setError(e.message || "Error al cargar usuarios");
     } finally {
@@ -48,13 +65,26 @@ export default function AdminDashboard({ apiUrl }) {
   };
 
   useEffect(() => {
-    load("", "");
+    load("", "", 1, perPage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    load(q, roleFilter);
+    setPage(1);
+    load(q, roleFilter, 1, perPage);
+  };
+
+  const goToPage = (next) => {
+    const clamped = Math.max(1, Math.min(totalPages || 1, next));
+    setPage(clamped);
+    load(q, roleFilter, clamped, perPage);
+  };
+
+  const changePerPage = (newPerPage) => {
+    setPerPage(newPerPage);
+    setPage(1);
+    load(q, roleFilter, 1, newPerPage);
   };
 
   const handleRoleChange = async (user, newRole) => {
@@ -126,7 +156,8 @@ export default function AdminDashboard({ apiUrl }) {
             onClick={() => {
               setQ("");
               setRoleFilter("");
-              load("", "");
+              setPage(1);
+              load("", "", 1, perPage);
             }}
           >
             Limpiar
@@ -216,6 +247,49 @@ export default function AdminDashboard({ apiUrl }) {
               )}
             </tbody>
           </table>
+
+          <div className="admin-pagination">
+            <span className="admin-pagination-info">
+              {total > 0
+                ? `Mostrando ${(page - 1) * perPage + 1}–${Math.min(
+                    page * perPage,
+                    total
+                  )} de ${total}`
+                : "Sin resultados"}
+            </span>
+            <div className="admin-pagination-controls">
+              <label>
+                Por página:{" "}
+                <select
+                  value={perPage}
+                  onChange={(e) => changePerPage(parseInt(e.target.value, 10))}
+                >
+                  {[10, 20, 50, 100].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                className="btn btn-outline-secondary btn-sm"
+                onClick={() => goToPage(page - 1)}
+                disabled={page <= 1 || loading}
+              >
+                ← Anterior
+              </button>
+              <span className="admin-pagination-page">
+                Página {page} de {Math.max(1, totalPages)}
+              </span>
+              <button
+                className="btn btn-outline-secondary btn-sm"
+                onClick={() => goToPage(page + 1)}
+                disabled={page >= totalPages || loading}
+              >
+                Siguiente →
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

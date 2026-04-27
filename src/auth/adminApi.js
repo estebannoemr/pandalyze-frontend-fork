@@ -13,13 +13,16 @@ async function handleResponse(response) {
   return response.json();
 }
 
-export async function adminListUsers(apiUrl, { q = "", role = "" } = {}) {
+export async function adminListUsers(
+  apiUrl,
+  { q = "", role = "", page = 1, perPage = 20 } = {}
+) {
   const params = new URLSearchParams();
   if (q) params.set("q", q);
   if (role) params.set("role", role);
-  const url = params.toString()
-    ? `${apiUrl}/admin/users?${params.toString()}`
-    : `${apiUrl}/admin/users`;
+  if (page) params.set("page", String(page));
+  if (perPage) params.set("per_page", String(perPage));
+  const url = `${apiUrl}/admin/users?${params.toString()}`;
   const response = await authFetch(url);
   return handleResponse(response);
 }

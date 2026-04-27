@@ -106,3 +106,29 @@
   color: #6c757d;
   padding: 16px !important;
 }
+
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 6px 4px;
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+.admin-pagination-info {
+  font-style: italic;
+}
+
+.admin-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-pagination-page {
+  font-weight: 600;
+}
