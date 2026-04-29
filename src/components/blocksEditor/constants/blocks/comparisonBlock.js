@@ -47,7 +47,8 @@ export const initComparisonBlock = () => {
         "rightValue",
         pythonGenerator.ORDER_NONE
       ) || 0;
-    var comparisonCode = `${dataFrameValue}[${columnNameValue} ${operator} ${rightValue}]`;
+    // var comparisonCode = `${dataFrameValue}[${columnNameValue} ${operator} ${rightValue}]`;
+    var comparisonCode = `${dataFrameValue}[${dataFrameValue}[${columnNameValue}] ${operator} ${rightValue}]`;
 
     return [comparisonCode, pythonGenerator.ORDER_FUNCTION_CALL];
   };

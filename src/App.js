@@ -373,33 +373,3 @@ function App() {
 }
 
 export default App;
-ashboard apiUrl={API_URL} isAdmin={isAdmin} />
-        </div>
-      )}
-
-      {showAuthOverlay && (
-        <div className="app-tab-panel active">
-          <AuthPage onCancel={() => setActiveTab("editor")} />
-        </div>
-      )}
-
-      {showProfileModal && (
-        <ProfileModal onClose={() => setShowProfileModal(false)} />
-      )}
-
-      {activeChallenge && (
-        <ChallengeModal
-          apiUrl={API_URL}
-          challenge={activeChallenge}
-          backendResponse={backendResponse}
-          csvStatus={challengeCsvStatus}
-          csvError={challengeCsvError}
-          onClose={handleCloseChallenge}
-          onMarkCompleted={handleMarkCompleted}
-        />
-      )}
-    </div>
-  );
-}
-
-export default App;

@@ -100,7 +100,7 @@ export default function ProfileModal({ onClose }) {
           <div className="profile-modal-info-row">
             <span className="profile-modal-label">Docente actual</span>
             <span className="profile-modal-value">
-              {user.teacher_id ? `#${user.teacher_id}` : "Sin docente"}
+              {user.teacher_name || user.teacher_email || "Sin docente"}
             </span>
           </div>
         )}
