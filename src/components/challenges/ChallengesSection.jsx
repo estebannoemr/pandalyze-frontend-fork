@@ -246,6 +246,19 @@ const ChallengesSection = ({
                   <span className="challenge-points-badge">
                     {challenge.points} pts
                   </span>
+                  {challenge.time_limit_seconds > 0 && (
+                    <span
+                      className="challenge-time-badge"
+                      title="Desafío contrareloj"
+                    >
+                      ⏱{" "}
+                      {Math.floor(challenge.time_limit_seconds / 60)}:
+                      {String(challenge.time_limit_seconds % 60).padStart(
+                        2,
+                        "0"
+                      )}
+                    </span>
+                  )}
                 </div>
 
                 <h4 className="challenge-card-title">

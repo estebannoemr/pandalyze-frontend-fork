@@ -557,3 +557,57 @@
     left: auto;
   }
 }
+
+/* --------------------- Countdown contrareloj --------------------- */
+
+.challenge-timer {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  font-size: 0.9rem;
+  background: #e9f5ff;
+  color: #0d6efd;
+  padding: 3px 10px;
+  border-radius: 10px;
+  letter-spacing: 1px;
+  border: 1px solid #b6dcff;
+  white-space: nowrap;
+}
+
+.challenge-timer.warning {
+  background: #fff3cd;
+  color: #b8860b;
+  border-color: #ffe69c;
+}
+
+.challenge-timer.danger {
+  background: #f8d7da;
+  color: #b02a37;
+  border-color: #f1aeb5;
+  animation: challenge-timer-pulse 0.7s infinite;
+}
+
+.challenge-timer.expired {
+  background: #6c757d;
+  color: #fff;
+  border-color: #5c636a;
+}
+
+@keyframes challenge-timer-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+/* Badge de tiempo en las cards */
+.challenge-time-badge {
+  display: inline-block;
+  background: #e9f5ff;
+  color: #0d6efd;
+  border: 1px solid #b6dcff;
+  font-family: "Courier New", monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 6px;
+  white-space: nowrap;
+}

@@ -73,6 +73,13 @@ const ChallengeModal = ({
   const [lastVerifiedOutput, setLastVerifiedOutput] = useState(null);
   const [minimized, setMinimized] = useState(false);
 
+  // Countdown visible para desafíos contrareloj. Sólo se activa si el
+  // desafío trae ``time_limit_seconds``. El reloj arranca en cuanto el
+  // CSV está listo y se detiene al aprobar / cerrar / agotarse.
+  const timeLimit = challenge?.time_limit_seconds || 0;
+  const [secondsLeft, setSecondsLeft] = useState(timeLimit);
+  const [timeUp, setTimeUp] = useState(false);
+
   // Tracking de tiempo activo: cada vez que el modal se monta para un
   // desafío guardamos el instante para acumular al desmontarse.
   const sessionStartRef = useRef(null);
@@ -88,7 +95,46 @@ const ChallengeModal = ({
     setSolutionCode("");
     setResult(null);
     setLastVerifiedOutput(null);
+    setSecondsLeft(challenge?.time_limit_seconds || 0);
+    setTimeUp(false);
   }, [challenge?.id]);
+
+  // Countdown: arranca cuando el CSV está listo y el desafío tiene tope.
+  // Se detiene al aprobar, al rendirse (showSolution) o al agotarse.
+  useEffect(() => {
+    if (!timeLimit) return;
+    if (csvStatus !== "ready") return;
+    if (phase === "passed" || timeUp || showSolution) return;
+    if (secondsLeft <= 0) {
+      setTimeUp(true);
+      return;
+    }
+    const id = setInterval(() => {
+      setSecondsLeft((s) => {
+        if (s <= 1) {
+          clearInterval(id);
+          setTimeUp(true);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [timeLimit, csvStatus, phase, showSolution, timeUp, secondsLeft]);
+
+  const formatTime = (s) => {
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+  };
+
+  const timerClass = (() => {
+    if (!timeLimit) return "";
+    if (timeUp) return "challenge-timer expired";
+    if (secondsLeft <= 10) return "challenge-timer danger";
+    if (secondsLeft / timeLimit < 0.3) return "challenge-timer warning";
+    return "challenge-timer";
+  })();
 
   // Acumular active_seconds al desmontar/cambiar de desafío.
   useEffect(() => {
@@ -121,7 +167,8 @@ const ChallengeModal = ({
     currentOutput !== null && currentOutput !== lastVerifiedOutput;
 
   const csvReady = csvStatus === "ready";
-  const canVerify = csvReady && hasNewOutput && phase !== "validating";
+  const canVerify =
+    csvReady && hasNewOutput && phase !== "validating" && !timeUp;
 
   const handleVerify = async () => {
     if (!canVerify || !challenge) return;
@@ -190,6 +237,11 @@ const ChallengeModal = ({
           <span className="challenge-modal-title">
             🏆 {challenge.title}
           </span>
+          {timeLimit > 0 && (
+            <span className={timerClass} title="Tiempo restante">
+              ⏱ {formatTime(secondsLeft)}
+            </span>
+          )}
           <div className="challenge-modal-actions">
             <button
               className="challenge-modal-icon-btn"
@@ -223,6 +275,11 @@ const ChallengeModal = ({
           >
             {DIFFICULTY_LABELS[challenge.difficulty] || challenge.difficulty}
           </span>
+          {timeLimit > 0 && (
+            <span className={timerClass} title="Tiempo restante">
+              ⏱ {formatTime(secondsLeft)}
+            </span>
+          )}
         </div>
         <div className="challenge-modal-actions">
           <button
@@ -245,6 +302,20 @@ const ChallengeModal = ({
       </div>
 
       <div className="challenge-modal-body">
+        {/* Banner de "tiempo agotado" para desafíos contrareloj */}
+        {timeLimit > 0 && timeUp && phase !== "passed" && (
+          <div className="challenge-modal-result failed">
+            <div className="challenge-modal-result-title">
+              ⏰ Se acabó el tiempo
+            </div>
+            <div>
+              No alcanzaste a verificar dentro del límite de{" "}
+              {formatTime(timeLimit)}. Podés cerrar el desafío e intentarlo de
+              nuevo cuando quieras, o ver la solución de referencia.
+            </div>
+          </div>
+        )}
+
         {/* Estado del CSV cargado */}
         <div className="challenge-modal-section">
           {csvStatus === "loading" && (
@@ -370,7 +441,9 @@ const ChallengeModal = ({
           onClick={handleVerify}
           disabled={!canVerify}
           title={
-            !csvReady
+            timeUp
+              ? "Se acabó el tiempo"
+              : !csvReady
               ? "Esperá a que cargue el dataset"
               : !hasNewOutput
               ? "Ejecutá el código y volvé a verificar"
