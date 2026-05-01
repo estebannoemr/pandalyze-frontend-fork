@@ -103,3 +103,9 @@
   min-width: 0;
   overflow: hidden;
 }
+
+/* Gráficos que necesitan toda la fila (comparativa entre clases con dos
+   ejes Y y desempeño por desafío con muchas filas). */
+.stats-chart-wide {
+  grid-column: 1 / -1;
+}

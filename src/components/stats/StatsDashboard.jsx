@@ -1,6 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Plot from "react-plotly.js";
-import { getStatsOverview, getStatsTeachers } from "./statsApi";
+import {
+  getStatsOverview,
+  getStatsTeachers,
+  getStatsByClass,
+  getStatsTimeDistribution,
+  getStatsByChallenge,
+} from "./statsApi";
 import "./StatsDashboard.css";
 
 const DIFFICULTY_LABELS = {
@@ -30,6 +36,12 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Etapa 3: agregados extra. Cada uno se carga en paralelo y falla
+  // independiente — un error en /by_class no debe bloquear el overview.
+  const [byClass, setByClass] = useState([]);
+  const [timeDist, setTimeDist] = useState(null);
+  const [byChallenge, setByChallenge] = useState([]);
 
   const loadTeachers = useCallback(async () => {
     if (!isAdmin) return;
@@ -68,6 +80,34 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
   useEffect(() => {
     loadOverview();
   }, [loadOverview]);
+
+  // Cargas extra de etapa 3, en paralelo. Fallan silenciosamente para no
+  // tapar el overview principal.
+  const loadExtras = useCallback(async () => {
+    const args = { teacherId: teacherId || undefined };
+    try {
+      const r = await getStatsByClass(apiUrl, args);
+      setByClass(r.classes || []);
+    } catch (_) {
+      setByClass([]);
+    }
+    try {
+      const r = await getStatsTimeDistribution(apiUrl, args);
+      setTimeDist(r);
+    } catch (_) {
+      setTimeDist(null);
+    }
+    try {
+      const r = await getStatsByChallenge(apiUrl, args);
+      setByChallenge(r.challenges || []);
+    } catch (_) {
+      setByChallenge([]);
+    }
+  }, [apiUrl, teacherId]);
+
+  useEffect(() => {
+    loadExtras();
+  }, [loadExtras]);
 
   const perStudent = data ? data.per_student || [] : [];
   const byDifficulty = data ? data.by_difficulty || {} : {};
@@ -236,6 +276,134 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
     };
   }, [timingAvg]);
 
+  // ---- Etapa 3: comparativa entre clases ----
+  // Bar chart agrupado: para cada clase, una barra con avg_completed y
+  // otra con avg_points (escala secundaria, separada del eje principal).
+  const classesChart = useMemo(() => {
+    const xs = byClass.map((c) => c.name);
+    return {
+      data: [
+        {
+          type: "bar",
+          name: "Desafíos completados (prom.)",
+          x: xs,
+          y: byClass.map((c) => c.avg_completed),
+          marker: { color: "#0d6efd" },
+          hovertemplate: "%{x}: %{y} desafíos prom.<extra></extra>",
+        },
+        {
+          type: "bar",
+          name: "Puntos (prom.)",
+          x: xs,
+          y: byClass.map((c) => c.avg_points),
+          marker: { color: "#ffc107" },
+          yaxis: "y2",
+          hovertemplate: "%{x}: %{y} pts prom.<extra></extra>",
+        },
+      ],
+      layout: {
+        title: { text: "Comparativa entre clases", font: { size: 14 } },
+        barmode: "group",
+        margin: { l: 50, r: 50, t: 40, b: 80 },
+        xaxis: { tickangle: -25, automargin: true },
+        yaxis: { title: "Desafíos prom." },
+        yaxis2: {
+          title: "Puntos prom.",
+          overlaying: "y",
+          side: "right",
+          showgrid: false,
+        },
+        height: 340,
+        paper_bgcolor: "transparent",
+        plot_bgcolor: "transparent",
+        showlegend: true,
+        legend: { orientation: "h", y: -0.3 },
+      },
+    };
+  }, [byClass]);
+
+  // ---- Etapa 3: distribución de tiempos (apilado por dificultad) ----
+  const timeDistChart = useMemo(() => {
+    if (!timeDist || !timeDist.distribution) {
+      return { data: [], layout: { height: 0 } };
+    }
+    const buckets = timeDist.buckets || [];
+    const series = ["basico", "intermedio", "avanzado"].map((diff) => ({
+      type: "bar",
+      name: DIFFICULTY_LABELS[diff],
+      x: buckets,
+      y: buckets.map((b) => {
+        const item = (timeDist.distribution[diff] || []).find(
+          (i) => i.bucket === b
+        );
+        return item ? item.count : 0;
+      }),
+      marker: { color: DIFFICULTY_COLORS[diff] },
+      hovertemplate: `${DIFFICULTY_LABELS[diff]} %{x}: %{y}<extra></extra>`,
+    }));
+    return {
+      data: series,
+      layout: {
+        title: {
+          text: "Distribución de tiempos activos por dificultad",
+          font: { size: 14 },
+        },
+        barmode: "stack",
+        margin: { l: 40, r: 20, t: 40, b: 60 },
+        xaxis: { title: "Tiempo activo" },
+        yaxis: { title: "Aprobados", dtick: 1 },
+        height: 320,
+        paper_bgcolor: "transparent",
+        plot_bgcolor: "transparent",
+        showlegend: true,
+        legend: { orientation: "h", y: -0.25 },
+      },
+    };
+  }, [timeDist]);
+
+  // ---- Etapa 3: desempeño por desafío (barras horizontales con pass_rate) ----
+  const challengePerfChart = useMemo(() => {
+    // Ordenamos ascendente por pass_rate: los desafíos más difíciles
+    // (pass_rate bajo) aparecen al tope, donde el ojo del docente busca.
+    const sorted = [...byChallenge].sort(
+      (a, b) => (a.pass_rate || 0) - (b.pass_rate || 0)
+    );
+    const labels = sorted.map(
+      (c) => `[${c.difficulty[0].toUpperCase()}] ${c.title}`
+    );
+    return {
+      data: [
+        {
+          type: "bar",
+          orientation: "h",
+          x: sorted.map((c) => Math.round((c.pass_rate || 0) * 100)),
+          y: labels,
+          marker: {
+            color: sorted.map((c) => DIFFICULTY_COLORS[c.difficulty] || "#0d6efd"),
+          },
+          text: sorted.map(
+            (c) =>
+              `${c.students_passed}/${c.students_total} • ${c.avg_attempts} int.`
+          ),
+          textposition: "outside",
+          hovertemplate:
+            "%{y}<br>Pass rate: %{x}%<br>%{text}<extra></extra>",
+        },
+      ],
+      layout: {
+        title: {
+          text: "Desempeño por desafío (pass rate %)",
+          font: { size: 14 },
+        },
+        margin: { l: 220, r: 80, t: 40, b: 40 },
+        xaxis: { range: [0, 110], title: "% aprobados" },
+        height: Math.max(260, sorted.length * 26 + 100),
+        paper_bgcolor: "transparent",
+        plot_bgcolor: "transparent",
+      },
+    };
+  }, [byChallenge]);
+
   const isEmpty = !loading && !error && perStudent.length === 0;
 
   return (
@@ -341,6 +509,47 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
                   useResizeHandler
                 />
               </div>
+
+              {/* Etapa 3 — comparativa entre clases. Sólo se renderiza si hay
+                  al menos una clase con alumnos en el scope; si no, queda
+                  oculto para no contaminar el grid con un gráfico vacío. */}
+              {byClass.length > 0 && (
+                <div className="stats-chart-card stats-chart-wide">
+                  <Plot
+                    data={classesChart.data}
+                    layout={classesChart.layout}
+                    config={{ displayModeBar: false, responsive: true }}
+                    style={{ width: "100%" }}
+                    useResizeHandler
+                  />
+                </div>
+              )}
+
+              {/* Etapa 3 — distribución de tiempos por dificultad. */}
+              {timeDist && timeDist.total_results_with_timing > 0 && (
+                <div className="stats-chart-card">
+                  <Plot
+                    data={timeDistChart.data}
+                    layout={timeDistChart.layout}
+                    config={{ displayModeBar: false, responsive: true }}
+                    style={{ width: "100%" }}
+                    useResizeHandler
+                  />
+                </div>
+              )}
+
+              {/* Etapa 3 — desempeño por desafío. */}
+              {byChallenge.length > 0 && (
+                <div className="stats-chart-card stats-chart-wide">
+                  <Plot
+                    data={challengePerfChart.data}
+                    layout={challengePerfChart.layout}
+                    config={{ displayModeBar: false, responsive: true }}
+                    style={{ width: "100%" }}
+                    useResizeHandler
+                  />
+                </div>
+              )}
             </div>
           )}
         </>
