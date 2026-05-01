@@ -36,6 +36,12 @@ import defaultBlocks from "../constants/blocks/defaultBlocks.json";
 const BlocksService = {
   variables: [],
   csvsData: [],
+  // Mapa csv_id (string) -> contenido CSV (string). Sólo se llena cuando
+  // un dataset se cargó "inline" (sin pasar por /uploadCsv) — típicamente
+  // para los CSVs de desafíos, que viven exclusivamente en el cliente.
+  // PythonEditor lo serializa y lo manda en cada /runPythonCode para que
+  // el backend pueda resolver read_csv(csv_id) sin tocar la DB.
+  inlineCsvs: {},
 
   initBlocks(useFrontRef, loadingExampleRef) {
     initPrintBlock();
@@ -93,6 +99,67 @@ const BlocksService = {
         this.addReadCsvBlockToWorkspace();
       }
     }
+  },
+
+  // Registra un CSV "inline" — ya descargado en el cliente — sin subirlo al
+  // backend. El csv_id debe ser único; típicamente lo armamos con
+  // ``BlocksService.nameToId(filename)`` para que sea determinístico y
+  // sobreviva a recargas del workspace. Si ya existe un csvData con ese
+  // id (por ejemplo, otro desafío con el mismo filename) lo reemplazamos.
+  registerInlineCsv({ id, filename, content, columnsNames }, autoAdd = true) {
+    if (id == null || !filename || typeof content !== "string") return;
+    const idStr = String(id);
+    // Evitar duplicar entradas en csvsData con el mismo id.
+    this.csvsData = this.csvsData.filter((c) => String(c.id) !== idStr);
+    this.csvsData.push({
+      id,
+      filename,
+      columnsNames: columnsNames || [],
+    });
+    this.inlineCsvs[idStr] = content;
+    if (autoAdd) {
+      this.addReadCsvBlockToWorkspace();
+    }
+  },
+
+  // Quita un CSV inline tanto del dropdown como del mapa de contenidos.
+  // Útil cuando se cierra/desinscribe un desafío.
+  unregisterInlineCsv(id) {
+    if (id == null) return;
+    const idStr = String(id);
+    this.csvsData = this.csvsData.filter((c) => String(c.id) !== idStr);
+    delete this.inlineCsvs[idStr];
+  },
+
+  // Devuelve el dict serializable que PythonEditor adjunta a cada
+  // /runPythonCode. Sólo incluye los CSVs inline que actualmente están
+  // referenciados por algún bloque read_csv del workspace, para no inflar
+  // requests con datasets que ya no se usan.
+  getInlineCsvsForRun() {
+    if (!this.inlineCsvs || Object.keys(this.inlineCsvs).length === 0) {
+      return {};
+    }
+    let inUseIds = null;
+    try {
+      const ws = Blockly.getMainWorkspace && Blockly.getMainWorkspace();
+      if (ws) {
+        inUseIds = new Set(
+          ws.getBlocksByType("read_csv").map((b) => {
+            const f = b.getField && b.getField("csvOptions");
+            return f ? String(f.getValue()) : null;
+          }).filter(Boolean)
+        );
+      }
+    } catch (_) {
+      inUseIds = null;
+    }
+    const out = {};
+    Object.keys(this.inlineCsvs).forEach((idStr) => {
+      if (inUseIds == null || inUseIds.has(idStr)) {
+        out[idStr] = this.inlineCsvs[idStr];
+      }
+    });
+    return out;
   },
 
   addReadCsvBlockToWorkspace() {

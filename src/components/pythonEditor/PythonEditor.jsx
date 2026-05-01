@@ -3,6 +3,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import "./styles.css";
 import { authFetch } from "../../auth/authFetch";
+import BlocksService from "../blocksEditor/services/BlocksService";
 
 const PythonEditor = ({
   frontendCode,
@@ -14,12 +15,20 @@ const PythonEditor = ({
 
   const handleSubmit = () => {
     const pythonCode = backendCode;
+    // Adjuntamos los CSVs "inline" (descargados al cliente sin pasar por
+    // /uploadCsv, típicamente del flujo de Desafíos) para que el backend
+    // pueda resolver read_csv(csv_id) sin tocar la DB. Si no hay ninguno
+    // (flujo libre con CSV subido manualmente) la dict queda vacía y el
+    // backend cae al lookup tradicional.
+    const inlineCsvs = BlocksService.getInlineCsvsForRun
+      ? BlocksService.getInlineCsvsForRun()
+      : {};
     authFetch(`${API_URL}/runPythonCode`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ code: pythonCode }),
+      body: JSON.stringify({ code: pythonCode, inline_csvs: inlineCsvs }),
     })
       .then((response) => {
         if (!response.ok) {

@@ -3,6 +3,7 @@ import {
   validateChallenge,
   getChallengeSolution,
 } from "./challengesApi";
+import { challengeDownloadUrl } from "./challengesCsvUploader";
 
 const DIFFICULTY_LABELS = {
   basico: "Básico",
@@ -327,6 +328,22 @@ const ChallengeModal = ({
             <div className="challenge-modal-dataset">
               ✅ Dataset <strong>{challenge.csv_filename}</strong> cargado y
               disponible. Se agregó un bloque <em>"read_csv"</em> al workspace.
+              <div className="challenge-modal-dataset-actions">
+                <a
+                  className="challenge-modal-download-link"
+                  href={challengeDownloadUrl(apiUrl, challenge.id)}
+                  download={challenge.csv_filename}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Descargar el CSV a tu computadora"
+                >
+                  ⬇ Descargar CSV
+                </a>
+                <span className="challenge-modal-dataset-hint">
+                  El dataset se carga sólo en tu navegador, no queda guardado
+                  en el servidor.
+                </span>
+              </div>
             </div>
           )}
           {csvStatus === "error" && (

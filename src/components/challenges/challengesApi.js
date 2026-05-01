@@ -23,6 +23,36 @@ export async function getChallenges(apiUrl) {
   return handleResponse(response);
 }
 
+export async function createChallenge(apiUrl, payload) {
+  const response = await authFetch(`${apiUrl}/challenges`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload || {}),
+  });
+  return handleResponse(response);
+}
+
+export async function getChallengeManage(apiUrl, challengeId) {
+  const response = await authFetch(`${apiUrl}/challenges/${challengeId}/manage`);
+  return handleResponse(response);
+}
+
+export async function updateChallenge(apiUrl, challengeId, payload) {
+  const response = await authFetch(`${apiUrl}/challenges/${challengeId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload || {}),
+  });
+  return handleResponse(response);
+}
+
+export async function deleteChallenge(apiUrl, challengeId) {
+  const response = await authFetch(`${apiUrl}/challenges/${challengeId}`, {
+    method: "DELETE",
+  });
+  return handleResponse(response);
+}
+
 export async function getChallengeCsv(apiUrl, challengeId) {
   const response = await authFetch(`${apiUrl}/challenges/${challengeId}/csv`);
   return handleResponse(response);

@@ -9,14 +9,13 @@ import ChallengeModal from "./components/challenges/ChallengeModal";
 import TeacherDashboard from "./components/teacher/TeacherDashboard";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import StatsDashboard from "./components/stats/StatsDashboard";
-import { getChallengeCsv } from "./components/challenges/challengesApi";
 import {
-  uploadCsvFile,
-  csvStringToFile,
+  loadChallengeCsvClientSide,
 } from "./components/challenges/challengesCsvUploader";
 import { useAuth } from "./auth/AuthContext";
 import AuthPage from "./auth/AuthPage";
 import ProfileModal from "./auth/ProfileModal";
+import Blockly from "blockly";
 
 function App() {
   const API_URL = process.env.REACT_APP_API_URL;
@@ -140,9 +139,10 @@ function App() {
       }
 
       try {
-        const csvInfo = await getChallengeCsv(API_URL, challenge.id);
-        const file = csvStringToFile(csvInfo.csv_content, csvInfo.csv_filename);
-        await uploadCsvFile(file, API_URL);
+        // Flujo no-persist: descargamos el CSV al cliente y lo registramos
+        // como inline en el BlocksService. /runPythonCode lo recibe en el
+        // body de cada ejecución, sin escribir a la tabla csv_data.
+        await loadChallengeCsvClientSide(API_URL, challenge);
         setChallengeCsvStatus("ready");
       } catch (e) {
         setChallengeCsvStatus("error");
@@ -166,6 +166,19 @@ function App() {
       setTotalPoints((prev) => prev + pointsEarned);
     }
   };
+
+
+  
+  // Para evitar que desaparezca el editor cuando cambia de pestaña / inicia sesión / empieza un desafío.
+  useEffect(() => {
+    if (activeTab === "editor") {
+      setTimeout(() => {
+        try { Blockly.svgResize(Blockly.getMainWorkspace()); } catch (e) {}
+      }, 200);
+    }
+  }, [activeTab]);
+
+
 
   if (bootstrapping) {
     return (
