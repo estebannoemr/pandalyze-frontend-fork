@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   validateChallenge,
   getChallengeSolution,
 } from "./challengesApi";
-import { challengeDownloadUrl } from "./challengesCsvUploader";
+import { authFetch } from "../../auth/authFetch";
 
 const DIFFICULTY_LABELS = {
   basico: "Básico",
@@ -171,6 +171,30 @@ const ChallengeModal = ({
   const canVerify =
     csvReady && hasNewOutput && phase !== "validating" && !timeUp;
 
+  // Descarga autenticada del CSV (el endpoint requiere JWT).
+  const handleDownloadCsv = useCallback(async () => {
+    if (!challenge) return;
+    try {
+      const res = await authFetch(
+        `${apiUrl}/challenges/${challenge.id}/download`
+      );
+      if (!res.ok) throw new Error("Error al descargar");
+      const text = await res.text();
+      // BOM + contenido para que Excel y otros programas lean UTF-8 con tildes
+      const blob = new Blob(["\uFEFF" + text], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = challenge.csv_filename || `challenge_${challenge.id}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("Error descargando CSV del desafío:", e);
+    }
+  }, [apiUrl, challenge]);
+
   const handleVerify = async () => {
     if (!canVerify || !challenge) return;
     setPhase("validating");
@@ -329,16 +353,14 @@ const ChallengeModal = ({
               ✅ Dataset <strong>{challenge.csv_filename}</strong> cargado y
               disponible. Se agregó un bloque <em>"read_csv"</em> al workspace.
               <div className="challenge-modal-dataset-actions">
-                <a
+                <button
                   className="challenge-modal-download-link"
-                  href={challengeDownloadUrl(apiUrl, challenge.id)}
-                  download={challenge.csv_filename}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  onClick={handleDownloadCsv}
                   title="Descargar el CSV a tu computadora"
+                  type="button"
                 >
                   ⬇ Descargar CSV
-                </a>
+                </button>
                 <span className="challenge-modal-dataset-hint">
                   El dataset se carga sólo en tu navegador, no queda guardado
                   en el servidor.
