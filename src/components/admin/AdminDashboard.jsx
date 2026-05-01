@@ -24,6 +24,7 @@ const ROLE_LABELS = {
 
 export default function AdminDashboard({ apiUrl }) {
   const [users, setUsers] = useState([]);
+  const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [q, setQ] = useState("");
@@ -56,6 +57,7 @@ export default function AdminDashboard({ apiUrl }) {
         perPage: perPageOverride,
       });
       setUsers(data.users || []);
+      setClasses(data.classes || []);
       setTotal(typeof data.total === "number" ? data.total : 0);
       setTotalPages(typeof data.pages === "number" ? data.pages : 1);
     } catch (e) {
@@ -111,6 +113,18 @@ export default function AdminDashboard({ apiUrl }) {
     }
   };
 
+  const handleClassChange = async (user, newClassId) => {
+    setActionError("");
+    try {
+      const data = await adminUpdateUser(apiUrl, user.id, {
+        class_id: newClassId === "" ? null : parseInt(newClassId, 10),
+      });
+      setUsers((prev) => prev.map((u) => (u.id === user.id ? data.user : u)));
+    } catch (e) {
+      setActionError(e.message || "Error al asignar clase");
+    }
+  };
+
   const handleDelete = async (user) => {
     if (
       !window.confirm(
@@ -126,6 +140,33 @@ export default function AdminDashboard({ apiUrl }) {
     } catch (e) {
       setActionError(e.message || "Error al eliminar");
     }
+  };
+
+  // Helper para obtener los códigos de clase según el rol
+  const getClassCodes = (user) => {
+    if (user.role === "docente") {
+      // Priorizar el array class_codes si existe (nuevas clases)
+      if (user.class_codes && user.class_codes.length > 0) {
+        return user.class_codes;
+      }
+      // Fallback al class_code legacy
+      return user.class_code ? [user.class_code] : [];
+    }
+    if (user.role === "alumno" && user.class_id && user.class_name) {
+      // Solo mostrar la clase a la que está asociado
+      return [{ name: user.class_name, code: user.class_code }];
+    }
+    return [];
+  };
+
+  // Helper para obtener display de docente (muestra su class_code)
+  const getTeacherDisplay = (teacher) => {
+    if (!teacher) return "—";
+    // Mostrar los códigos de clase del docente
+    const codes = teacher.class_codes && teacher.class_codes.length > 0 
+      ? teacher.class_codes 
+      : (teacher.class_code ? [teacher.class_code] : []);
+    return codes.length > 0 ? codes.join(", ") : "sin código";
   };
 
   return (
@@ -181,7 +222,7 @@ export default function AdminDashboard({ apiUrl }) {
               <tr>
                 <th>Email</th>
                 <th>Rol</th>
-                <th>Docente / Class code</th>
+                <th>Clases</th>
                 <th>Puntos</th>
                 <th>Completados</th>
                 <th>Último acceso</th>
@@ -206,27 +247,59 @@ export default function AdminDashboard({ apiUrl }) {
                     )}
                   </td>
                   <td>
-                    {u.role === "docente" && (
-                      <code className="admin-class-code">
-                        {u.class_code || "—"}
-                      </code>
-                    )}
                     {u.role === "alumno" && (
-                      <select
-                        value={u.teacher_id || ""}
-                        onChange={(e) =>
-                          handleTeacherChange(u, e.target.value)
-                        }
-                      >
-                        <option value="">— sin docente —</option>
-                        {teachers.map((t) => (
-                          <option key={t.id} value={t.id}>
-                            {t.email}
-                          </option>
-                        ))}
-                      </select>
+                      <div>
+                        {u.class_name ? (
+                          <div className="admin-class-badges">
+                            <span
+                              className="admin-class-badge"
+                              title={`Clase: ${u.class_name}`}
+                            >
+                              {u.class_name}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="admin-unassigned">—</span>
+                        )}
+                        <div style={{ marginTop: "8px", fontSize: "0.9em" }}>
+                          <select
+                            value={u.class_id || ""}
+                            onChange={(e) =>
+                              handleClassChange(u, e.target.value)
+                            }
+                            title="Asignar clase"
+                            style={{ width: "100%" }}
+                          >
+                            <option value="">Sin clase</option>
+                            {classes.map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.name} - {c.code}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
                     )}
-                    {u.role === "admin" && "—"}
+                    {u.role === "docente" && (
+                      <div className="admin-class-badges">
+                        {u.class_codes && u.class_codes.length > 0 ? (
+                          u.class_codes.map((code, idx) => (
+                            <span
+                              key={idx}
+                              className="admin-class-badge"
+                              title={`Clase del docente: ${code}`}
+                            >
+                              {code}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="admin-unassigned">—</span>
+                        )}
+                      </div>
+                    )}
+                    {u.role === "admin" && (
+                      <span className="admin-unassigned">—</span>
+                    )}
                   </td>
                   <td>{u.total_points}</td>
                   <td>{u.completed_count}</td>
