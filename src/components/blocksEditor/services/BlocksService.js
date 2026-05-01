@@ -178,6 +178,26 @@ const BlocksService = {
     );
   },
 
+  replaceWorkspaceWithReadCsvBlock(csvId) {
+    const workspace = Blockly.getMainWorkspace();
+    if (!workspace) return;
+
+    workspace.clear();
+
+    const block = workspace.newBlock("read_csv");
+    if (csvId != null) {
+      block.setFieldValue(String(csvId), "csvOptions");
+    }
+    block.initSvg();
+    block.render();
+
+    const metrics = workspace.getMetrics();
+    block.moveBy(
+      metrics ? metrics.viewLeft + 20 : 20,
+      metrics ? metrics.viewTop + 20 : 20
+    );
+  },
+
   onRefreshFlyout() {
     if (this.variables.length === 0) {
       return [

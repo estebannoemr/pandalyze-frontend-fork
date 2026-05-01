@@ -517,7 +517,8 @@
   gap: 6px;
 }
 
-.challenge-inline-editor-wrap {
+.challenge-inline-editor-wrap,
+.challenge-editor-panel-below {
   margin-top: 12px;
   padding: 14px;
   border: 1px solid #cfe2ff;
@@ -527,6 +528,10 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+}
+
+.challenge-editor-panel-below {
+  margin-top: 16px;
 }
 
 .challenge-inline-editor-title {

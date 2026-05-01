@@ -213,6 +213,11 @@ const ChallengesSection = ({
     return out;
   }, [filteredChallenges]);
 
+  const editingChallenge = useMemo(
+    () => challenges.find((challenge) => challenge.id === editingChallengeId) || null,
+    [challenges, editingChallengeId]
+  );
+
   // ------------------------------------------------------------------
   // Derivados de gamificación
   // ------------------------------------------------------------------
@@ -813,31 +818,31 @@ const ChallengesSection = ({
                             )}
                           </div>
                         </div>
-
-                        {editingChallengeId === challenge.id && (
-                          <div className="challenge-inline-editor-wrap">
-                            <div className="challenge-inline-editor-title">
-                              Editando este desafío
-                            </div>
-                            {renderChallengeEditor({
-                              formState: editChallenge,
-                              setFormState: setEditChallenge,
-                              csvSourceModeValue: editCsvSourceMode,
-                              setCsvSourceModeValue: setEditCsvSourceMode,
-                              loading: editLoading,
-                              errorMessage: editError,
-                              okMessage: editOk,
-                              submitLabel: "Guardar cambios",
-                              loadingLabel: "Guardando...",
-                              onCancel: closeEditChallengeForm,
-                              onSubmit: submitEditChallenge,
-                            })}
-                          </div>
-                        )}
                       </div>
                     );
                   })}
                 </div>
+
+                {editingChallenge && editingChallenge.difficulty === section && (
+                  <div className="challenge-editor-panel-below">
+                    <div className="challenge-inline-editor-title">
+                      Editando: {editingChallenge.title}
+                    </div>
+                    {renderChallengeEditor({
+                      formState: editChallenge,
+                      setFormState: setEditChallenge,
+                      csvSourceModeValue: editCsvSourceMode,
+                      setCsvSourceModeValue: setEditCsvSourceMode,
+                      loading: editLoading,
+                      errorMessage: editError,
+                      okMessage: editOk,
+                      submitLabel: "Guardar cambios",
+                      loadingLabel: "Guardando...",
+                      onCancel: closeEditChallengeForm,
+                      onSubmit: submitEditChallenge,
+                    })}
+                  </div>
+                )}
               </section>
             );
           })}

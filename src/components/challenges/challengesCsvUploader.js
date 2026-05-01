@@ -86,8 +86,9 @@ export async function loadChallengeCsvClientSide(apiUrl, challenge) {
       content: csvContent,
       columnsNames,
     },
-    true
+    false
   );
+  BlocksService.replaceWorkspaceWithReadCsvBlock(csvId);
 
   return { csvId, fileName: filename, columnsNames };
 }
