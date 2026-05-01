@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getTeacherStudents } from "../challenges/challengesApi";
+import MyClasses from "./MyClasses";
 import "./TeacherDashboard.css";
 
 function formatDate(iso) {
@@ -57,12 +58,17 @@ export default function TeacherDashboard({ apiUrl, classCode }) {
 
   return (
     <div className="teacher-dashboard">
+      {/* Sección de gestión de clases (modelo nuevo: múltiples clases). */}
+      <MyClasses apiUrl={apiUrl} />
+
       <div className="teacher-header">
         <h2>Mis alumnos</h2>
-        <div className="teacher-class-code-block">
-          <span className="teacher-class-code-label">Código de clase:</span>
-          <span className="teacher-class-code-value">{classCode || "—"}</span>
-        </div>
+        {classCode && (
+          <div className="teacher-class-code-block" title="Código legacy de tu clase principal">
+            <span className="teacher-class-code-label">Código legacy:</span>
+            <span className="teacher-class-code-value">{classCode}</span>
+          </div>
+        )}
         <button className="btn btn-outline-primary" onClick={load}>
           Actualizar
         </button>

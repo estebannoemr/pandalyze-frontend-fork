@@ -1,0 +1,263 @@
+/* Estilos del módulo "Mis clases" del docente.
+   Sigue la paleta general (#b9e2f7 fondo, dificultades verde/naranja/rojo). */
+
+.myclasses-section {
+  padding: 16px;
+  background: transparent;
+}
+
+.myclasses-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.myclasses-header h2 {
+  margin: 0;
+}
+
+.myclasses-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.myclasses-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 18px 20px;
+  border-left: 6px solid #0d6efd;
+}
+
+.myclasses-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.myclasses-card-title {
+  margin: 0;
+  color: #1e3c72;
+  font-size: 1.15rem;
+}
+
+.myclasses-name-input {
+  max-width: 380px;
+}
+
+.myclasses-code-block {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.myclasses-code-label {
+  color: #6c757d;
+}
+
+.myclasses-code-value {
+  background: #fff3cd;
+  color: #b8860b;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: "Courier New", monospace;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  user-select: all;
+}
+
+.myclasses-meta {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 0.92rem;
+  color: #495057;
+  margin-bottom: 12px;
+}
+
+.myclasses-bulk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0 12px;
+  padding: 8px 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.myclasses-bulk-group {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.myclasses-bulk-group .btn.difficulty-basico {
+  background: #d4edda;
+  color: #155724;
+  border-color: #28a745;
+}
+.myclasses-bulk-group .btn.difficulty-intermedio {
+  background: #ffe9d4;
+  color: #8a4b00;
+  border-color: #fd7e14;
+}
+.myclasses-bulk-group .btn.difficulty-avanzado {
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #dc3545;
+}
+
+.myclasses-challenge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.myclasses-difficulty-group {
+  background: #fdfdfd;
+  border: 1px solid #eef2f7;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.myclasses-difficulty-title {
+  font-size: 0.95rem;
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid currentColor;
+}
+.myclasses-difficulty-title.difficulty-basico {
+  color: #28a745;
+}
+.myclasses-difficulty-title.difficulty-intermedio {
+  color: #fd7e14;
+}
+.myclasses-difficulty-title.difficulty-avanzado {
+  color: #dc3545;
+}
+
+.myclasses-challenge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.myclasses-challenge-row:hover {
+  background: #f1f7ff;
+  border-radius: 4px;
+}
+
+.myclasses-challenge-title {
+  flex-grow: 1;
+}
+
+.myclasses-challenge-points {
+  color: #0d6efd;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.myclasses-challenge-timer {
+  color: #b02a37;
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+.myclasses-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  border-top: 1px solid #eef2f7;
+  padding-top: 10px;
+}
+
+.myclasses-summary {
+  font-size: 0.9rem;
+  color: #495057;
+  font-style: italic;
+}
+
+.myclasses-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.myclasses-create-form {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  padding: 16px 20px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  border: 2px dashed #0d6efd;
+}
+
+.myclasses-create-form h4 {
+  margin: 0 0 10px;
+  color: #1e3c72;
+}
+
+.myclasses-create-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #495057;
+}
+
+.myclasses-create-label .form-control {
+  margin-top: 4px;
+}
+
+.myclasses-create-checkbox {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+  font-weight: normal;
+  color: #495057;
+}
+
+.myclasses-create-hint {
+  background: #fff3cd;
+  border: 1px solid #ffe69c;
+  color: #8a6d3b;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.myclasses-error {
+  color: #b02a37;
+  background: #f8d7da;
+  border: 1px solid #f1aeb5;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+.myclasses-empty {
+  background: #fff;
+  border-radius: 8px;
+  padding: 14px 18px;
+  color: #6c757d;
+  font-style: italic;
+  margin-top: 12px;
+}

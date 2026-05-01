@@ -1,0 +1,79 @@
+.admin-classes {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 16px 18px;
+  margin: 16px 0;
+}
+
+.admin-classes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-classes-header h3 {
+  margin: 0;
+  color: #1e3c72;
+}
+
+.admin-classes-summary {
+  display: flex;
+  gap: 18px;
+  font-size: 0.92rem;
+  color: #495057;
+  margin-bottom: 10px;
+}
+
+.admin-classes-error {
+  color: #b02a37;
+  background: #f8d7da;
+  border: 1px solid #f1aeb5;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.admin-classes-empty {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.admin-classes-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-classes-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-classes-table th,
+.admin-classes-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid #eef2f7;
+  font-size: 0.92rem;
+}
+
+.admin-classes-table th {
+  background: #f8f9fa;
+  color: #1e3c72;
+  font-weight: 600;
+}
+
+.admin-classes-table tbody tr:hover {
+  background: #f1f7ff;
+}
+
+.admin-classes-code {
+  background: #fff3cd;
+  color: #b8860b;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: "Courier New", monospace;
+  font-weight: bold;
+  letter-spacing: 1px;
+}

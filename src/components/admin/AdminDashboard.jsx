@@ -4,6 +4,7 @@ import {
   adminUpdateUser,
   adminDeleteUser,
 } from "../../auth/adminApi";
+import AdminClasses from "./AdminClasses";
 import "./AdminDashboard.css";
 
 function formatDate(iso) {
@@ -129,6 +130,10 @@ export default function AdminDashboard({ apiUrl }) {
 
   return (
     <div className="admin-dashboard">
+      {/* Sección de clases globales: read-mostly, listado de todas las
+          clases del sistema con su docente, código y # de alumnos. */}
+      <AdminClasses apiUrl={apiUrl} />
+
       <div className="admin-header">
         <h2>Gestión de usuarios</h2>
         <form className="admin-search" onSubmit={handleSearchSubmit}>

@@ -46,14 +46,27 @@ export default function ProfileModal({ onClose }) {
     try {
       const res = await updateProfile(patch);
       const changed = (res && res.changed) || [];
+      const className = (res && res.user && res.user.class_name) || "";
+      const teacherName =
+        (res && res.user && (res.user.teacher_name || res.user.teacher_email)) || "";
       if (changed.length === 0) {
         setInfo("Sin cambios.");
       } else {
         const messages = changed.map((c) => {
           if (c === "password") return "Actualizaste tu contraseña";
-          if (c === "class_code" && patch.class_code === "")
-            return "Te desasociaste del docente";
-          if (c === "class_code") return "Cambiaste de clase";
+          if ((c === "class_code" || c === "class_id") && patch.class_code === "") {
+            return "Te desasociaste de la clase";
+          }
+          if (c === "class_code" || c === "class_id") {
+            if (className && teacherName) {
+              return `Cambiaste a la clase ${className} de ${teacherName}`;
+            }
+            if (className) {
+              return `Cambiaste a la clase ${className}`;
+            }
+            return "Cambiaste de clase";
+          }
+          if (c === "teacher_id") return "Actualizaste tu docente";
           return c;
         });
         setInfo(messages.join(". ") + ".");
