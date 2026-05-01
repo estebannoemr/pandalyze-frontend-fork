@@ -273,7 +273,7 @@ export default function AdminDashboard({ apiUrl }) {
                             <option value="">Sin clase</option>
                             {classes.map((c) => (
                               <option key={c.id} value={c.id}>
-                                {c.name} - {c.code}
+                                {c.name} - {c.code} - {c.teacher_name}
                               </option>
                             ))}
                           </select>
