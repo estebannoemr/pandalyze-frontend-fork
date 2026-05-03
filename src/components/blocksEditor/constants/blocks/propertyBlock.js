@@ -21,8 +21,8 @@ export const initPropertyBlock = (csvsData, loadingExampleRef) => {
     // al momento de cargar el bloque. (?)
     const blockInputCsvColumnsNames = csvsData
       .find((csvData) => csvData.id.toString() === csvId)
-      .columnsNames?.map((columnName) => [columnName, columnName]);
-    
+      ?.columnsNames?.map((columnName) => [columnName, columnName]);
+
     return blockInputCsvColumnsNames;
   };
 
@@ -34,6 +34,16 @@ export const initPropertyBlock = (csvsData, loadingExampleRef) => {
 
     if (csvId) {
       const blockInputCsvColumnsNames = getNewOptions(csvId);
+
+      // Si todavía no tenemos las columnas del CSV (csvsData no lo registró
+      // aún o el id no coincide), dejamos el dropdown en estado neutro en
+      // lugar de crashear al intentar leer [0][1] sobre undefined.
+      if (!blockInputCsvColumnsNames || blockInputCsvColumnsNames.length === 0) {
+        const dropdownField = block.getField("dropdown");
+        dropdownField.menuGenerator_ = [["Columna", "Columna"]];
+        dropdownField.setValue("Columna");
+        return;
+      }
 
       const currentOptions = block.getField("dropdown").getOptions();
 

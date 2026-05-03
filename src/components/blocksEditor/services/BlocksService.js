@@ -55,7 +55,7 @@ const BlocksService = {
     initVariablesBlocks();
     initPropertyBlock(this.csvsData, loadingExampleRef);
     initLineBlock();
-    initMapViewerBlock();
+    initMapViewerBlock(this.csvsData, loadingExampleRef);
     initBarBlock();
     initScatterBlock();
     initPieBlock();
@@ -69,7 +69,7 @@ const BlocksService = {
     initComparisonBlock();
     initPrimitiveBlocks();
     initShowInConsoleBlock(useFrontRef);
-    initGroupByBlock();
+    initGroupByBlock(this.csvsData, loadingExampleRef);
     initSumBlock();
     initValueCountsBlock();
     initValuesBlock();
@@ -110,7 +110,15 @@ const BlocksService = {
     if (id == null || !filename || typeof content !== "string") return;
     const idStr = String(id);
     // Evitar duplicar entradas en csvsData con el mismo id.
-    this.csvsData = this.csvsData.filter((c) => String(c.id) !== idStr);
+    // IMPORTANTE: mutamos el array in-place (no reasignamos con filter) porque
+    // propertyBlock.js recibió esta misma referencia al inicializarse. Si la
+    // reemplazamos, el dropdown del bloque "property" queda apuntando al array
+    // viejo y no ve los CSVs inline registrados después.
+    for (let i = this.csvsData.length - 1; i >= 0; i--) {
+      if (String(this.csvsData[i].id) === idStr) {
+        this.csvsData.splice(i, 1);
+      }
+    }
     this.csvsData.push({
       id,
       filename,
@@ -127,7 +135,12 @@ const BlocksService = {
   unregisterInlineCsv(id) {
     if (id == null) return;
     const idStr = String(id);
-    this.csvsData = this.csvsData.filter((c) => String(c.id) !== idStr);
+    // Mutación in-place — ver comentario en registerInlineCsv.
+    for (let i = this.csvsData.length - 1; i >= 0; i--) {
+      if (String(this.csvsData[i].id) === idStr) {
+        this.csvsData.splice(i, 1);
+      }
+    }
     delete this.inlineCsvs[idStr];
   },
 

@@ -351,7 +351,9 @@ const ChallengeModal = ({
           {csvStatus === "ready" && (
             <div className="challenge-modal-dataset">
               ✅ Dataset <strong>{challenge.csv_filename}</strong> cargado y
-              disponible. Se agregó un bloque <em>"read_csv"</em> al workspace.
+              disponible.
+              Si querés trabajar con él en tu computadora, podés descargarlo haciendo click abajo.
+              {/* Se agregó un bloque <em>"read_csv"</em> al workspace. */}
               <div className="challenge-modal-dataset-actions">
                 <button
                   className="challenge-modal-download-link"
@@ -361,10 +363,10 @@ const ChallengeModal = ({
                 >
                   ⬇ Descargar CSV
                 </button>
-                <span className="challenge-modal-dataset-hint">
+                {/* <span className="challenge-modal-dataset-hint">
                   El dataset se carga sólo en tu navegador, no queda guardado
                   en el servidor.
-                </span>
+                </span> */}
               </div>
             </div>
           )}

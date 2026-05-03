@@ -228,7 +228,7 @@ const ChallengesSection = ({
   const allBadges = gamificationStatus?.all_badges || [];
 
   const handleStart = (challenge) => {
-    if (!isUnlocked(challenge, completedIds, challenges)) return;
+    if (!isTeacherView && !isUnlocked(challenge, completedIds, challenges)) return;
     if (typeof onStartChallenge === "function") {
       onStartChallenge(challenge);
     }
