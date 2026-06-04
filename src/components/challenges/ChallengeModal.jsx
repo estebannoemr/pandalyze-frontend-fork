@@ -59,6 +59,7 @@ const ChallengeModal = ({
   apiUrl,
   challenge,
   backendResponse,
+  backendCode, // código Python generado por los bloques del alumno
   csvStatus, // "loading" | "ready" | "error"
   csvError,
   onClose,
@@ -211,7 +212,7 @@ const ChallengeModal = ({
         apiUrl,
         challenge.id,
         currentOutput || "",
-        { startTime, activeSeconds }
+        { startTime, activeSeconds, userCode: backendCode || "" }
       );
       setResult(response);
       setLastVerifiedOutput(currentOutput);

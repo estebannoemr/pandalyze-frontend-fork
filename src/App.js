@@ -375,6 +375,7 @@ function App() {
           apiUrl={API_URL}
           challenge={activeChallenge}
           backendResponse={backendResponse}
+          backendCode={backendCode}
           csvStatus={challengeCsvStatus}
           csvError={challengeCsvError}
           onClose={handleCloseChallenge}

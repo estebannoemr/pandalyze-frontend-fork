@@ -62,13 +62,14 @@ export async function validateChallenge(
   apiUrl,
   challengeId,
   output,
-  { startTime = null, activeSeconds = null } = {}
+  { startTime = null, activeSeconds = null, userCode = null } = {}
 ) {
   const body = { output: output || "" };
   if (startTime) body.start_time = startTime;
   if (typeof activeSeconds === "number" && Number.isFinite(activeSeconds)) {
     body.active_seconds = Math.max(0, Math.floor(activeSeconds));
   }
+  if (typeof userCode === "string") body.user_code = userCode;
   const response = await authFetch(
     `${apiUrl}/challenges/${challengeId}/validate`,
     {
