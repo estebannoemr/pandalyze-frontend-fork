@@ -10,6 +10,8 @@ const PythonEditor = ({
   backendCode,
   setBackendResponse,
   isLoading,
+  isTeacher,
+  onOpenPy2Blocks,
 }) => {
   const API_URL = process.env.REACT_APP_API_URL;
 
@@ -79,14 +81,31 @@ const PythonEditor = ({
   return (
     <>
       <div className="code-segment">
-        <button
-          disabled={isLoading}
-          className="btn btn-success run-code-button"
-          style={{ marginBottom: "16px" }}
-          onClick={handleSubmit}
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            alignItems: "center",
+            marginBottom: "16px",
+          }}
         >
-          Ejecutar código
-        </button>
+          {isTeacher && (
+            <button
+              className="btn btn-outline-primary"
+              onClick={onOpenPy2Blocks}
+              title="Convertir codigo Python en bloques (solo docentes)"
+            >
+              Codigo Python a bloques
+            </button>
+          )}
+          <button
+            disabled={isLoading}
+            className="btn btn-success run-code-button"
+            onClick={handleSubmit}
+          >
+            Ejecutar código
+          </button>
+        </div>
         <CodeMirror
           value={frontendCode}
           height="50vh"

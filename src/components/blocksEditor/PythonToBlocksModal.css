@@ -1,0 +1,84 @@
+.p2b-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.p2b-modal {
+  background: #fff;
+  width: min(640px, 92vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  padding: 20px 22px;
+}
+
+.p2b-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.p2b-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #1769aa;
+}
+
+.p2b-close {
+  border: none;
+  background: transparent;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+}
+
+.p2b-hint {
+  font-size: 0.82rem;
+  color: #555;
+  margin: 4px 0 12px;
+  line-height: 1.4;
+}
+
+.p2b-textarea {
+  width: 100%;
+  font-family: "Consolas", "Monaco", monospace;
+  font-size: 0.9rem;
+  padding: 10px;
+  border: 1px solid #b9c4ce;
+  border-radius: 8px;
+  resize: vertical;
+  background: #f8fafc;
+}
+
+.p2b-error {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fdecea;
+  color: #b71c1c;
+  font-size: 0.85rem;
+}
+
+.p2b-ok {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #e8f5e9;
+  color: #1b5e20;
+  font-size: 0.85rem;
+}
+
+.p2b-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}

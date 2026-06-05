@@ -76,6 +76,10 @@ export const toolbox = {
             },
             {
               kind: "block",
+              type: "tail",
+            },
+            {
+              kind: "block",
               type: "info",
             },
             {

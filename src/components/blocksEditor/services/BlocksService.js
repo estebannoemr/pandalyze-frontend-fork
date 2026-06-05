@@ -1,6 +1,7 @@
 import Blockly from "blockly";
 import { toolbox } from "../constants/toolbox";
 import { initHeadBlock } from "../constants/blocks/headBlock";
+import { initTailBlock } from "../constants/blocks/tailBlock";
 import { initInfoBlock } from "../constants/blocks/infoBlock";
 import { initColumnBlock } from "../constants/blocks/columnBlock";
 import { initShapeBlock } from "../constants/blocks/shapeBlock";
@@ -47,6 +48,7 @@ const BlocksService = {
     initPrintBlock();
     initReadCsvBlock(useFrontRef);
     initHeadBlock();
+    initTailBlock();
     initInfoBlock();
     initColumnBlock();
     initShapeBlock();
@@ -209,6 +211,65 @@ const BlocksService = {
       metrics ? metrics.viewLeft + 20 : 20,
       metrics ? metrics.viewTop + 20 : 20
     );
+  },
+
+  // Devuelve el csv_id "activo": el del primer bloque read_csv que ya esta en
+  // el workspace (en Desafios, lo coloca replaceWorkspaceWithReadCsvBlock con el
+  // dataset del desafio). Sirve para que el conversor Python->bloques resuelva
+  // read_csv(csv_id) al dataset correcto. Fallbacks: ultimo csv inline, ultimo
+  // csvData cargado.
+  getActiveCsvId() {
+    try {
+      const ws = Blockly.getMainWorkspace && Blockly.getMainWorkspace();
+      if (ws) {
+        const blocks = ws.getBlocksByType("read_csv");
+        if (blocks && blocks.length) {
+          const f = blocks[0].getField && blocks[0].getField("csvOptions");
+          const v = f && f.getValue();
+          if (v) return String(v);
+        }
+      }
+    } catch (_) {}
+    const inlineKeys = Object.keys(this.inlineCsvs || {});
+    if (inlineKeys.length) return inlineKeys[inlineKeys.length - 1];
+    if (this.csvsData && this.csvsData.length) {
+      return String(this.csvsData[this.csvsData.length - 1].id);
+    }
+    return null;
+  },
+
+  // Carga en el workspace un "state" de serializacion generado a partir de
+  // codigo Python (ver services/pythonToBlocks.js). Limpia el workspace actual
+  // y carga los bloques nuevos. Devuelve "" si ok, o un mensaje de error.
+  loadGeneratedBlocks(state, variables) {
+    const workspace = Blockly.getMainWorkspace();
+    if (!workspace) return "No se encontro el editor de bloques.";
+    if (!state || !state.blocks) return "No hay bloques para cargar.";
+
+    // Registrar las variables (df, etc.) ANTES de cargar, para que los dropdowns
+    // de variables_get/set tengan la opcion correspondiente al cargar el state.
+    if (Array.isArray(variables) && variables.length) {
+      variables.forEach((v) => {
+        if (v && v.id != null && !this.variables.some((x) => String(x.id) === String(v.id))) {
+          this.variables.push({ id: String(v.id), name: v.name });
+        }
+      });
+      this.updateVariablesDrowdown();
+    }
+
+    const backup = Blockly.serialization.workspaces.save(workspace);
+    try {
+      workspace.clear();
+      Blockly.serialization.workspaces.load(state, workspace);
+      return "";
+    } catch (e) {
+      // Rollback al estado previo si la carga falla.
+      try {
+        workspace.clear();
+        Blockly.serialization.workspaces.load(backup, workspace);
+      } catch (_) {}
+      return "No se pudieron generar los bloques. Revisa que el CSV usado este cargado.";
+    }
   },
 
   onRefreshFlyout() {

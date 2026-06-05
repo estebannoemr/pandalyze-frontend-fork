@@ -15,6 +15,7 @@ import {
 import { useAuth } from "./auth/AuthContext";
 import AuthPage from "./auth/AuthPage";
 import ProfileModal from "./auth/ProfileModal";
+import PythonToBlocksModal from "./components/blocksEditor/PythonToBlocksModal";
 import Blockly from "blockly";
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
   const [activeTab, setActiveTab] = useState("editor");
 
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showPy2Blocks, setShowPy2Blocks] = useState(false);
 
   const [activeChallenge, setActiveChallenge] = useState(null);
   const [challengeCsvStatus, setChallengeCsvStatus] = useState("idle");
@@ -323,6 +325,8 @@ function App() {
             frontendCode={frontendCode}
             backendCode={backendCode}
             setBackendResponse={setBackendResponse}
+            isTeacher={isTeacher}
+            onOpenPy2Blocks={() => setShowPy2Blocks(true)}
           />
         </div>
         <OutputConsole backendResponse={backendResponse} />
@@ -368,6 +372,10 @@ function App() {
 
       {showProfileModal && (
         <ProfileModal onClose={() => setShowProfileModal(false)} />
+      )}
+
+      {showPy2Blocks && isTeacher && (
+        <PythonToBlocksModal onClose={() => setShowPy2Blocks(false)} />
       )}
 
       {activeChallenge && (
