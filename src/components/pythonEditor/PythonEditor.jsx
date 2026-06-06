@@ -102,6 +102,7 @@ const PythonEditor = ({
             disabled={isLoading}
             className="btn btn-success run-code-button"
             onClick={handleSubmit}
+            style={{ marginLeft: "auto" }}
           >
             Ejecutar código
           </button>

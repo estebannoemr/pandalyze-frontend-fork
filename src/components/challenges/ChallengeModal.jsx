@@ -354,7 +354,6 @@ const ChallengeModal = ({
               ✅ Dataset <strong>{challenge.csv_filename}</strong> cargado y
               disponible.
               Si querés trabajar con él en tu computadora, podés descargarlo haciendo click abajo.
-              {/* Se agregó un bloque <em>"read_csv"</em> al workspace. */}
               <div className="challenge-modal-dataset-actions">
                 <button
                   className="challenge-modal-download-link"
@@ -365,8 +364,8 @@ const ChallengeModal = ({
                   ⬇ Descargar CSV
                 </button>
                 {/* <span className="challenge-modal-dataset-hint">
-                  El dataset se carga sólo en tu navegador, no queda guardado
-                  en el servidor.
+                  El dataset se sirve desde Google Drive vía el servidor, y se
+                  mantiene sólo en tu navegador — no queda guardado en la base.
                 </span> */}
               </div>
             </div>
