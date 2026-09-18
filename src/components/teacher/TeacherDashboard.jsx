@@ -90,6 +90,7 @@ export default function TeacherDashboard({ apiUrl, classCode }) {
             <thead>
               <tr>
                 <th>Email</th>
+                <th>Comisión</th>
                 <th>Nivel</th>
                 <th>Puntos</th>
                 <th>Desafíos completados</th>
@@ -109,6 +110,7 @@ export default function TeacherDashboard({ apiUrl, classCode }) {
               {students.map((s) => (
                 <tr key={s.id}>
                   <td>{s.email}</td>
+                  <td>{s.class_name || "Sin comisión"}</td>
                   <td>
                     <span className="teacher-level-badge">
                       Nivel {s.level} - {s.level_title}

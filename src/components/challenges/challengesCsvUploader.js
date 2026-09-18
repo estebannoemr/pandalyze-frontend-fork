@@ -114,7 +114,7 @@ export function challengeDownloadUrl(apiUrl, challengeId) {
 /**
  * @deprecated El flujo de Desafíos ya no sube el CSV al backend. Se mantiene
  * exportada para que cualquier código de terceros que la importe siga
- * compilando, pero no se usa desde App.js a partir de la etapa 2.
+ * compilando, pero no se usa desde App.js.
  */
 export async function uploadCsvFile(file, apiUrl) {
   if (!file) {

@@ -37,7 +37,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Etapa 3: agregados extra. Cada uno se carga en paralelo y falla
+  // Agregados extra. Cada uno se carga en paralelo y falla
   // independiente -> un error en /by_class no debe bloquear el overview.
   const [byClass, setByClass] = useState([]);
   const [timeDist, setTimeDist] = useState(null);
@@ -81,7 +81,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
     loadOverview();
   }, [loadOverview]);
 
-  // Cargas extra de etapa 3, en paralelo. Fallan silenciosamente para no
+  // Cargas extra en paralelo. Fallan silenciosamente para no
   // tapar el overview principal.
   const loadExtras = useCallback(async () => {
     const args = { teacherId: teacherId || undefined };
@@ -276,7 +276,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
     };
   }, [timingAvg]);
 
-  // ---- Etapa 3: comparativa entre clases ----
+  // ---- Comparativa entre clases ----
   // Bar chart agrupado: para cada clase, una barra con avg_completed y
   // otra con avg_points (escala secundaria, separada del eje principal).
   const classesChart = useMemo(() => {
@@ -322,7 +322,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
     };
   }, [byClass]);
 
-  // ---- Etapa 3: distribución de tiempos (apilado por dificultad) ----
+  // ---- Distribución de tiempos (apilado por dificultad) ----
   const timeDistChart = useMemo(() => {
     if (!timeDist || !timeDist.distribution) {
       return { data: [], layout: { height: 0 } };
@@ -361,7 +361,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
     };
   }, [timeDist]);
 
-  // ---- Etapa 3: desempeño por desafío (barras horizontales con pass_rate) ----
+  // ---- Desempeño por desafío (barras horizontales con pass_rate) ----
   const challengePerfChart = useMemo(() => {
     // Ordenamos ascendente por pass_rate: los desafíos más difíciles
     // (pass_rate bajo) aparecen al tope, donde el ojo del docente busca.
