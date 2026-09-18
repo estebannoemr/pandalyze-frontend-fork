@@ -4,7 +4,7 @@ import MyClasses from "./MyClasses";
 import "./TeacherDashboard.css";
 
 function formatDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     const d = new Date(iso);
     return d.toLocaleString();
@@ -13,10 +13,10 @@ function formatDate(iso) {
   }
 }
 
-// Formatea segundos como "Xm Ys" (o "—" si no hay dato). Mantiene legibilidad
+// Formatea segundos como "Xm Ys" (o "-" si no hay dato). Mantiene legibilidad
 // sin exponer precisión innecesaria; el dato es solo para docentes/admin.
 function formatDuration(seconds) {
-  if (seconds == null || !Number.isFinite(Number(seconds))) return "—";
+  if (seconds == null || !Number.isFinite(Number(seconds))) return "-";
   const total = Math.max(0, Math.floor(Number(seconds)));
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
@@ -26,10 +26,10 @@ function formatDuration(seconds) {
   return `${s}s`;
 }
 
-// Devuelve "primero → último" para una dificultad, o "—" si no hay datos.
+// Devuelve "primero → último" para una dificultad, o "-" si no hay datos.
 function renderTimingPair(timing, diff) {
   const t = timing?.[diff];
-  if (!t || (t.first == null && t.last == null)) return "—";
+  if (!t || (t.first == null && t.last == null)) return "-";
   return `${formatDuration(t.first)} → ${formatDuration(t.last)}`;
 }
 
@@ -111,7 +111,7 @@ export default function TeacherDashboard({ apiUrl, classCode }) {
                   <td>{s.email}</td>
                   <td>
                     <span className="teacher-level-badge">
-                      Nivel {s.level} — {s.level_title}
+                      Nivel {s.level} - {s.level_title}
                     </span>
                   </td>
                   <td className="teacher-points">{s.total_points}</td>

@@ -1,6 +1,6 @@
 import React from "react";
 
-// Panel de perfil del usuario — muestra puntos, nivel, barra de progreso
+// Panel de perfil del usuario - muestra puntos, nivel, barra de progreso
 // y la grilla de emblemas (obtenidos y bloqueados).
 const GamificationProfile = ({
   totalPoints = 0,

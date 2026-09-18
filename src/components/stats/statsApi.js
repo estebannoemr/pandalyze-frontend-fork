@@ -19,7 +19,7 @@ export async function getStatsTeachers(apiUrl) {
   return data;
 }
 
-// Etapa 3 — agregados por clase, distribución de tiempos y desempeño por desafío.
+// Agregados por clase, distribución de tiempos y desempeño por desafío.
 
 export async function getStatsByClass(apiUrl, { teacherId } = {}) {
   const qs = teacherId ? `?teacher_id=${encodeURIComponent(teacherId)}` : "";

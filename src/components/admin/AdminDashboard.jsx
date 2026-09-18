@@ -8,7 +8,7 @@ import AdminClasses from "./AdminClasses";
 import "./AdminDashboard.css";
 
 function formatDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     return new Date(iso).toLocaleString();
   } catch (_) {
@@ -161,7 +161,7 @@ export default function AdminDashboard({ apiUrl }) {
 
   // Helper para obtener display de docente (muestra su class_code)
   const getTeacherDisplay = (teacher) => {
-    if (!teacher) return "—";
+    if (!teacher) return "-";
     // Mostrar los códigos de clase del docente
     const codes = teacher.class_codes && teacher.class_codes.length > 0 
       ? teacher.class_codes 
@@ -259,7 +259,7 @@ export default function AdminDashboard({ apiUrl }) {
                             </span>
                           </div>
                         ) : (
-                          <span className="admin-unassigned">—</span>
+                          <span className="admin-unassigned">-</span>
                         )}
                         <div style={{ marginTop: "8px", fontSize: "0.9em" }}>
                           <select
@@ -293,12 +293,12 @@ export default function AdminDashboard({ apiUrl }) {
                             </span>
                           ))
                         ) : (
-                          <span className="admin-unassigned">—</span>
+                          <span className="admin-unassigned">-</span>
                         )}
                       </div>
                     )}
                     {u.role === "admin" && (
-                      <span className="admin-unassigned">—</span>
+                      <span className="admin-unassigned">-</span>
                     )}
                   </td>
                   <td>{u.total_points}</td>

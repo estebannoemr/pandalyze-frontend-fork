@@ -38,7 +38,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
   const [error, setError] = useState("");
 
   // Etapa 3: agregados extra. Cada uno se carga en paralelo y falla
-  // independiente — un error en /by_class no debe bloquear el overview.
+  // independiente -> un error en /by_class no debe bloquear el overview.
   const [byClass, setByClass] = useState([]);
   const [timeDist, setTimeDist] = useState(null);
   const [byChallenge, setByChallenge] = useState([]);
@@ -510,7 +510,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
                 />
               </div>
 
-              {/* Etapa 3 — comparativa entre clases. Sólo se renderiza si hay
+              {/* Comparativa entre clases. Sólo se renderiza si hay
                   al menos una clase con alumnos en el scope; si no, queda
                   oculto para no contaminar el grid con un gráfico vacío. */}
               {byClass.length > 0 && (
@@ -525,7 +525,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
                 </div>
               )}
 
-              {/* Etapa 3 — distribución de tiempos por dificultad. */}
+              {/* Distribución de tiempos por dificultad. */}
               {timeDist && timeDist.total_results_with_timing > 0 && (
                 <div className="stats-chart-card">
                   <Plot
@@ -538,7 +538,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
                 </div>
               )}
 
-              {/* Etapa 3 — desempeño por desafío. */}
+              {/* Desempeño por desafío. */}
               {byChallenge.length > 0 && (
                 <div className="stats-chart-card stats-chart-wide">
                   <Plot

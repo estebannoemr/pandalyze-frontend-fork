@@ -34,7 +34,8 @@ function deterministicCsvId(filename) {
 /**
  * Parser muy básico de la primera fila del CSV para sacar columnas. No
  * intenta cubrir el caso completo (comillas con comas embebidas, etc.)
- * — para los datasets de los desafíos sirve y evita pulling de papaparse.
+ * -> para los datasets de los desafíos sirve y evita traer una dependencia
+ * pesada para parsing de CSVs.
  */
 function extractColumns(csvContent) {
   const firstLine = (csvContent || "").split(/\r?\n/, 1)[0] || "";
@@ -96,7 +97,7 @@ export async function loadChallengeCsvClientSide(apiUrl, challenge) {
 /**
  * URL absoluta al endpoint de descarga, útil para mostrarla como link
  * "Descargar CSV" en el modal del desafío. authFetch no la cubre porque
- * es un anchor, no un fetch — el header Authorization no viaja, así que
+ * es un anchor, no un fetch -> el header Authorization no viaja, así que
  * el backend la sirve con @jwt_required pero la mayoría de los browsers
  * negocian sin Auth y descargan igual cuando el usuario está logueado vía
  * cookies; si el deploy se mueve a JWT-only, conviene servir la descarga

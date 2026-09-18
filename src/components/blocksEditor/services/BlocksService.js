@@ -38,7 +38,7 @@ const BlocksService = {
   variables: [],
   csvsData: [],
   // Mapa csv_id (string) -> contenido CSV (string). Sólo se llena cuando
-  // un dataset se cargó "inline" (sin pasar por /uploadCsv) — típicamente
+  // un dataset se cargó "inline" (sin pasar por /uploadCsv) - típicamente
   // para los CSVs de desafíos, que viven exclusivamente en el cliente.
   // PythonEditor lo serializa y lo manda en cada /runPythonCode para que
   // el backend pueda resolver read_csv(csv_id) sin tocar la DB.
@@ -103,7 +103,7 @@ const BlocksService = {
     }
   },
 
-  // Registra un CSV "inline" — ya descargado en el cliente — sin subirlo al
+  // Registra un CSV "inline" -> ya descargado en el cliente - sin subirlo al
   // backend. El csv_id debe ser único; típicamente lo armamos con
   // ``BlocksService.nameToId(filename)`` para que sea determinístico y
   // sobreviva a recargas del workspace. Si ya existe un csvData con ese
@@ -137,7 +137,7 @@ const BlocksService = {
   unregisterInlineCsv(id) {
     if (id == null) return;
     const idStr = String(id);
-    // Mutación in-place — ver comentario en registerInlineCsv.
+    // Mutación in-place -> ver comentario en registerInlineCsv.
     for (let i = this.csvsData.length - 1; i >= 0; i--) {
       if (String(this.csvsData[i].id) === idStr) {
         this.csvsData.splice(i, 1);

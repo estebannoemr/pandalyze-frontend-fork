@@ -8,7 +8,7 @@ import "./ProfileModal.css";
  * Permite cambiar la contraseña (validando la actual) y, para alumnos,
  * asociarse a un docente o desasociarse mediante el ``class_code``.
  *
- * No expone el rol ni el email — esas son responsabilidad del admin.
+ * No expone el rol ni el email -> esas son responsabilidad del admin.
  */
 export default function ProfileModal({ onClose }) {
   const { user, updateProfile } = useAuth();

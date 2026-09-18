@@ -365,7 +365,7 @@ const ChallengeModal = ({
                 </button>
                 {/* <span className="challenge-modal-dataset-hint">
                   El dataset se sirve desde Google Drive vía el servidor, y se
-                  mantiene sólo en tu navegador — no queda guardado en la base.
+                  mantiene sólo en tu navegador - no queda guardado en la base.
                 </span> */}
               </div>
             </div>
