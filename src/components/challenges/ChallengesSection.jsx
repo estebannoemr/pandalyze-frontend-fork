@@ -78,6 +78,14 @@ const CATEGORY_OPTIONS = [
   "visualizacion",
 ];
 
+// Tablero de posiciones (top 10 anónimo y "tu posición"): DESACTIVADO.
+// Se quitó de la pantalla porque la comparación entre estudiantes puede
+// generar ansiedad y desmotivar a quienes más apoyo necesitan (ver el
+// capítulo 3 de la tesina). No se borró nada: el componente Leaderboard.jsx y
+// el endpoint GET /challenges/leaderboard siguen intactos. Para volver a
+// mostrarlo, cambiar este valor a true.
+const TABLERO_HABILITADO = false;
+
 // Lógica de desbloqueo progresivo
 const isUnlocked = (challenge, completedIds, allChallenges) => {
   if (challenge.difficulty === "basico") return true;
@@ -811,8 +819,8 @@ const ChallengesSection = ({
         )}
       </div>
 
-      {/* Leaderboard anónimo: visible para todos los usuarios autenticados */}
-      <Leaderboard apiUrl={apiUrl} />
+      {/* Tablero de posiciones anónimo: desactivado (ver TABLERO_HABILITADO). */}
+      {TABLERO_HABILITADO && <Leaderboard apiUrl={apiUrl} />}
 
       {/* Filtros */}
       <div className="challenges-filters">
