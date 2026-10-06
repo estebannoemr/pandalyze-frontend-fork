@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import "./ChallengesSection.css";
 import GamificationProfile from "./GamificationProfile";
 import Leaderboard from "./Leaderboard";
+import { formatText } from "./formatText";
 import { useAuth } from "../../auth/AuthContext";
 import {
   getChallenges,
@@ -973,7 +974,7 @@ const ChallengesSection = ({
                           )}
 
                           <p className="challenge-card-description">
-                            {challenge.description}
+                            {formatText(challenge.description)}
                           </p>
 
                           <div className="challenge-card-footer">

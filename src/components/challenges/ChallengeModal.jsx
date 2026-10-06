@@ -4,6 +4,7 @@ import {
   getChallengeSolution,
 } from "./challengesApi";
 import { authFetch } from "../../auth/authFetch";
+import { formatText } from "./formatText";
 
 const DIFFICULTY_LABELS = {
   basico: "Básico",
@@ -382,7 +383,7 @@ const ChallengeModal = ({
 
         {/* Descripción breve */}
         <div className="challenge-modal-section">
-          <p style={{ margin: 0 }}>{challenge.description}</p>
+          <p style={{ margin: 0 }}>{formatText(challenge.description)}</p>
         </div>
 
         {/* Instrucciones */}
@@ -390,7 +391,7 @@ const ChallengeModal = ({
           <strong>Instrucciones:</strong>
           <ol className="challenge-modal-instructions">
             {(challenge.instructions || []).map((step, idx) => (
-              <li key={idx}>{step}</li>
+              <li key={idx}>{formatText(step)}</li>
             ))}
           </ol>
         </div>
@@ -403,7 +404,7 @@ const ChallengeModal = ({
             onToggle={(e) => setShowHint(e.target.open)}
           >
             <summary>💡 Pista</summary>
-            <p>{challenge.hint}</p>
+            <p>{formatText(challenge.hint)}</p>
           </details>
         )}
 
@@ -433,17 +434,37 @@ const ChallengeModal = ({
               result.passed ? "passed" : "failed"
             }`}
           >
+            {/* El título distingue los cuatro resultados que devuelve el
+                backend en ``tier``: perfect, correct, suspicious y wrong. */}
             <div className="challenge-modal-result-title">
               {result.passed
-                ? `🎉 ¡Correcto!${
+                ? `${
+                    result.tier === "perfect"
+                      ? "🎉 ¡Perfecto! Llegaste a la solución esperada."
+                      : "✅ ¡Correcto!"
+                  }${
                     result.points_earned ? ` +${result.points_earned} pts` : ""
                   }`
+                : result.tier === "suspicious"
+                ? "🤔 Acá hay algo raro"
                 : "❌ Todavía no es correcto"}
             </div>
-            <div>{result.feedback}</div>
+            {result.passed && result.tier === "correct" && (
+              <div style={{ marginBottom: 6 }}>
+                Llegaste por un camino distinto al de la solución de
+                referencia. Si querés, comparalo con tu docente.
+              </div>
+            )}
+            {!result.passed && result.tier === "suspicious" && (
+              <div style={{ marginBottom: 6 }}>
+                La salida coincide, pero tu código no trabaja sobre el
+                dataset. Resolvelo con los bloques a partir del CSV.
+              </div>
+            )}
+            {result.feedback && <div>{formatText(result.feedback)}</div>}
             {result.suggestion && !result.passed && (
               <div style={{ marginTop: 6, fontStyle: "italic" }}>
-                💡 {result.suggestion}
+                💡 {formatText(result.suggestion)}
               </div>
             )}
             {result.first_try && result.passed && (
