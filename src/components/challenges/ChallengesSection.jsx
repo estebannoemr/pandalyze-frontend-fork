@@ -810,11 +810,18 @@ const ChallengesSection = ({
         ) : (
           <>
             <h2 className="challenges-scope-title">Desafíos</h2>
-            <p className="challenges-scope-text">
-              Todavía no estás en ninguna comisión, por eso ves el catálogo
-              completo. Si tu docente te dio un código de comisión, cargalo
-              desde "Mi perfil" para ver los desafíos de tu curso.
-            </p>
+            {!loading && !errorMsg && challenges.length === 0 ? (
+              <p className="challenges-scope-text">
+                Para poder ver los desafíos, abrí "Mi perfil" y sumate a tu
+                comisión con el código que te dio tu docente.
+              </p>
+            ) : (
+              <p className="challenges-scope-text">
+                Todavía no estás en ninguna comisión, por eso ves el catálogo
+                general. Si tu docente te dio un código de comisión, cargalo
+                desde "Mi perfil" para ver los desafíos de tu curso.
+              </p>
+            )}
           </>
         )}
       </div>
@@ -904,7 +911,7 @@ const ChallengesSection = ({
       {/* Secciones de desafíos por dificultad */}
       {!loading && !errorMsg && (
         <div>
-          {filteredChallenges.length === 0 && (
+          {filteredChallenges.length === 0 && challenges.length > 0 && (
             <div className="challenges-empty">
               No hay desafíos para los filtros seleccionados.
             </div>
