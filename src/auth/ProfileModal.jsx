@@ -6,7 +6,7 @@ import "./ProfileModal.css";
  * Modal de edición de perfil para el usuario autenticado.
  *
  * Permite cambiar la contraseña (validando la actual) y, para alumnos,
- * asociarse a un docente o desasociarse mediante el ``class_code``.
+ * sumarse a una comisión (o dejarla) mediante su código de inscripción.
  *
  * No expone el rol ni el email -> esas son responsabilidad del admin.
  */
@@ -55,16 +55,16 @@ export default function ProfileModal({ onClose }) {
         const messages = changed.map((c) => {
           if (c === "password") return "Actualizaste tu contraseña";
           if ((c === "class_code" || c === "class_id") && patch.class_code === "") {
-            return "Te desasociaste de la clase";
+            return "Te desasociaste de la comisión";
           }
           if (c === "class_code" || c === "class_id") {
             if (className && teacherName) {
-              return `Cambiaste a la clase ${className} de ${teacherName}`;
+              return `Cambiaste a la comisión ${className} de ${teacherName}`;
             }
             if (className) {
-              return `Cambiaste a la clase ${className}`;
+              return `Cambiaste a la comisión ${className}`;
             }
-            return "Cambiaste de clase";
+            return "Cambiaste de comisión";
           }
           if (c === "teacher_id") return "Actualizaste tu docente";
           return c;
@@ -117,6 +117,14 @@ export default function ProfileModal({ onClose }) {
             </span>
           </div>
         )}
+        {isAlumno && (
+          <div className="profile-modal-info-row">
+            <span className="profile-modal-label">Comisión actual</span>
+            <span className="profile-modal-value">
+              {user.class_name || "Sin comisión"}
+            </span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="profile-modal-form">
           <fieldset className="profile-modal-fieldset">
@@ -144,9 +152,9 @@ export default function ProfileModal({ onClose }) {
 
           {isAlumno && (
             <fieldset className="profile-modal-fieldset">
-              <legend>Asociarme a un docente</legend>
+              <legend>Sumarme a una comisión</legend>
               <label>
-                Código de clase (escribí "-" para desasociarte)
+                Código de comisión (escribí "-" para desasociarte)
                 <input
                   type="text"
                   maxLength={16}

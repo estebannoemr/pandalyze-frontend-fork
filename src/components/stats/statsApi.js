@@ -5,7 +5,7 @@ export async function getStatsOverview(apiUrl, { teacherId } = {}) {
   const r = await authFetch(`${apiUrl}/stats/overview${qs}`);
   const data = await r.json().catch(() => ({}));
   if (!r.ok) {
-    throw new Error((data && data.error) || "Error al cargar estadisticas.");
+    throw new Error((data && data.error) || "Error al cargar estadísticas.");
   }
   return data;
 }
@@ -27,7 +27,7 @@ export async function getStatsByClass(apiUrl, { teacherId } = {}) {
   const data = await r.json().catch(() => ({}));
   if (!r.ok) {
     throw new Error(
-      (data && data.error) || "Error al cargar estadísticas por clase."
+      (data && data.error) || "Error al cargar estadísticas por comisión."
     );
   }
   return data;

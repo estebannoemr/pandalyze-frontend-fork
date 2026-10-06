@@ -75,7 +75,7 @@ const ChallengeModal = ({
   const [lastVerifiedOutput, setLastVerifiedOutput] = useState(null);
   const [minimized, setMinimized] = useState(false);
 
-  // Countdown visible para desafíos contrareloj. Sólo se activa si el
+  // Countdown visible para desafíos contrarreloj. Sólo se activa si el
   // desafío trae ``time_limit_seconds``. El reloj arranca en cuanto el
   // CSV está listo y se detiene al aprobar / cerrar / agotarse.
   const timeLimit = challenge?.time_limit_seconds || 0;
@@ -223,7 +223,9 @@ const ChallengeModal = ({
         // (si se permitiera) empezaría de cero.
         clearTimingStorage(challenge.id);
         sessionStartRef.current = null;
-        if (typeof onMarkCompleted === "function") {
+        // En vista previa (docente/admin) el intento no se registra ni
+        // suma puntos, así que tampoco se marca como completado.
+        if (!response.preview && typeof onMarkCompleted === "function") {
           onMarkCompleted(challenge.id, response.points_earned || 0, response.first_try);
         }
       } else {
@@ -328,7 +330,7 @@ const ChallengeModal = ({
       </div>
 
       <div className="challenge-modal-body">
-        {/* Banner de "tiempo agotado" para desafíos contrareloj */}
+        {/* Banner de "tiempo agotado" para desafíos contrarreloj */}
         {timeLimit > 0 && timeUp && phase !== "passed" && (
           <div className="challenge-modal-result failed">
             <div className="challenge-modal-result-title">
@@ -447,6 +449,12 @@ const ChallengeModal = ({
             {result.first_try && result.passed && (
               <div style={{ marginTop: 6 }}>
                 ⚡ ¡Lo lograste en el primer intento!
+              </div>
+            )}
+            {result.preview && (
+              <div style={{ marginTop: 6, fontStyle: "italic" }}>
+                Vista previa de docente: este intento no se registra ni suma
+                puntos o emblemas.
               </div>
             )}
           </div>

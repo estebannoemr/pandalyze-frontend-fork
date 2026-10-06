@@ -121,7 +121,7 @@ export default function AdminDashboard({ apiUrl }) {
       });
       setUsers((prev) => prev.map((u) => (u.id === user.id ? data.user : u)));
     } catch (e) {
-      setActionError(e.message || "Error al asignar clase");
+      setActionError(e.message || "Error al asignar comisión");
     }
   };
 
@@ -149,8 +149,7 @@ export default function AdminDashboard({ apiUrl }) {
       if (user.class_codes && user.class_codes.length > 0) {
         return user.class_codes;
       }
-      // Fallback al class_code legacy
-      return user.class_code ? [user.class_code] : [];
+      return [];
     }
     if (user.role === "alumno" && user.class_id && user.class_name) {
       // Solo mostrar la clase a la que está asociado
@@ -163,9 +162,7 @@ export default function AdminDashboard({ apiUrl }) {
   const getTeacherDisplay = (teacher) => {
     if (!teacher) return "-";
     // Mostrar los códigos de clase del docente
-    const codes = teacher.class_codes && teacher.class_codes.length > 0 
-      ? teacher.class_codes 
-      : (teacher.class_code ? [teacher.class_code] : []);
+    const codes = teacher.class_codes || [];
     return codes.length > 0 ? codes.join(", ") : "sin código";
   };
 
@@ -222,7 +219,7 @@ export default function AdminDashboard({ apiUrl }) {
               <tr>
                 <th>Email</th>
                 <th>Rol</th>
-                <th>Clases</th>
+                <th>Comisiones</th>
                 <th>Puntos</th>
                 <th>Completados</th>
                 <th>Último acceso</th>
@@ -267,10 +264,10 @@ export default function AdminDashboard({ apiUrl }) {
                             onChange={(e) =>
                               handleClassChange(u, e.target.value)
                             }
-                            title="Asignar clase"
+                            title="Asignar comisión"
                             style={{ width: "100%" }}
                           >
-                            <option value="">Sin clase</option>
+                            <option value="">Sin comisión</option>
                             {classes.map((c) => (
                               <option key={c.id} value={c.id}>
                                 {c.name} - {c.code} - {c.teacher_name}
@@ -287,7 +284,7 @@ export default function AdminDashboard({ apiUrl }) {
                             <span
                               key={idx}
                               className="admin-class-badge"
-                              title={`Clase del docente: ${code}`}
+                              title={`Comisión del docente: ${code}`}
                             >
                               {code}
                             </span>

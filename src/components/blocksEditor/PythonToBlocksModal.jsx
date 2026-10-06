@@ -43,14 +43,14 @@ const PythonToBlocksModal = ({ onClose }) => {
     <div className="p2b-overlay" role="dialog" aria-modal="true">
       <div className="p2b-modal">
         <div className="p2b-header">
-          <h3>Codigo Python a bloques</h3>
+          <h3>Código Python a bloques</h3>
           <button className="p2b-close" onClick={onClose} aria-label="Cerrar">
             ×
           </button>
         </div>
 
         <p className="p2b-hint">
-          Pegá codigo Python (pandas) y se convierte en bloques. Cargá primero el
+          Pegá código Python (pandas) y se convierte en bloques. Cargá primero el
           CSV que uses para que los nombres de columnas se reconozcan. Soporta:
           read_csv, .shape/.head/.columns/.describe/.info/.dtypes,
           .mean/.max/.min/.sum/.count/.value_counts/.unique, filtros df[df["c"]

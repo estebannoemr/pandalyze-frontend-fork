@@ -124,6 +124,8 @@ function App() {
       setActiveChallenge(challenge);
       setChallengeCsvStatus("loading");
       setChallengeCsvError("");
+      // Consola limpia: no debe quedar la salida de un desafío anterior.
+      setBackendResponse({});
       setActiveTab("editor");
 
       // Timing oculto: registramos el momento exacto en que el alumno
@@ -158,6 +160,9 @@ function App() {
     setActiveChallenge(null);
     setChallengeCsvStatus("idle");
     setChallengeCsvError("");
+    // Al cerrar un desafío se limpia la consola para que su salida no
+    // quede a la vista ni se confunda con la del próximo desafío.
+    setBackendResponse({});
   };
 
   const handleMarkCompleted = (challengeId, pointsEarned = 0) => {
@@ -211,7 +216,7 @@ function App() {
         <div className="title-container">
           <span className="title">Pandalyze: </span>
           <span className="subtitle">
-            aprender Ciencia de Datos con programacion en bloques
+            aprender Ciencia de Datos con programación en bloques
           </span>
         </div>
         <div className="app-user-box">
@@ -232,7 +237,7 @@ function App() {
                 className="btn btn-outline-secondary btn-sm"
                 onClick={logout}
               >
-                Cerrar sesion
+                Cerrar sesión
               </button>
             </>
           ) : (
@@ -242,7 +247,7 @@ function App() {
                 className="btn btn-primary btn-sm"
                 onClick={() => setActiveTab("auth")}
               >
-                Iniciar sesion
+                Iniciar sesión
               </button>
             </>
           )}
@@ -269,11 +274,11 @@ function App() {
             }
             setActiveTab("challenges");
           }}
-          title={!isAuthenticated ? "Inicia sesion para acceder" : undefined}
+          title={!isAuthenticated ? "Iniciá sesión para acceder" : undefined}
         >
-          Desafios
+          Desafíos
           {!isAuthenticated && <span className="app-tab-lock">LOCK</span>}
-          {isAuthenticated && completedIds.length > 0 && (
+          {isAuthenticated && !isTeacher && !isAdmin && completedIds.length > 0 && (
             <span className="app-tab-badge">{completedIds.length}</span>
           )}
         </button>
@@ -284,7 +289,7 @@ function App() {
             className={"app-tab " + (activeTab === "teacher" ? "active" : "")}
             onClick={() => setActiveTab("teacher")}
           >
-            Mis alumnos
+            Mis comisiones
           </button>
         )}
         {isAdmin && (
@@ -304,7 +309,7 @@ function App() {
             className={"app-tab " + (activeTab === "stats" ? "active" : "")}
             onClick={() => setActiveTab("stats")}
           >
-            Estadisticas
+            Estadísticas
           </button>
         )}
       </div>
@@ -348,7 +353,7 @@ function App() {
 
       {activeTab === "teacher" && isTeacher && (
         <div className="app-tab-panel active">
-          <TeacherDashboard apiUrl={API_URL} classCode={user && user.class_code} />
+          <TeacherDashboard apiUrl={API_URL} />
         </div>
       )}
 

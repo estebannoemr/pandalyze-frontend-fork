@@ -30,7 +30,7 @@ export default function AdminClasses({ apiUrl }) {
         setTeachers(map);
       } catch (_) {}
     } catch (e) {
-      setError(e.message || "No se pudieron cargar las clases.");
+      setError(e.message || "No se pudieron cargar las comisiones.");
     } finally {
       setLoading(false);
     }
@@ -44,9 +44,9 @@ export default function AdminClasses({ apiUrl }) {
   const handleDelete = async (klass) => {
     if (
       !window.confirm(
-        `Borrar la clase "${klass.name}" del docente ${
+        `¿Borrar la comisión "${klass.name}" del docente ${
           teachers[klass.teacher_id] || klass.teacher_id
-        }? Los alumnos quedan sin clase.`
+        }? Los alumnos quedan sin comisión.`
       )
     )
       return;
@@ -66,20 +66,20 @@ export default function AdminClasses({ apiUrl }) {
   return (
     <div className="admin-classes">
       <div className="admin-classes-header">
-        <h3>Todas las clases del sistema</h3>
+        <h3>Todas las comisiones del sistema</h3>
         <button className="btn btn-outline-primary btn-sm" onClick={refresh}>
           Actualizar
         </button>
       </div>
 
-      {loading && <p>Cargando clases…</p>}
+      {loading && <p>Cargando comisiones…</p>}
       {error && <div className="admin-classes-error">{error}</div>}
 
       {!loading && !error && (
         <>
           <div className="admin-classes-summary">
             <span>
-              Clases: <b>{classes.length}</b>
+              Comisiones: <b>{classes.length}</b>
             </span>
             <span>
               Alumnos asociados: <b>{totalStudents}</b>
@@ -88,7 +88,7 @@ export default function AdminClasses({ apiUrl }) {
 
           {classes.length === 0 ? (
             <p className="admin-classes-empty">
-              Todavía no hay clases creadas en el sistema.
+              Todavía no hay comisiones creadas en el sistema.
             </p>
           ) : (
             <div className="admin-classes-table-wrap">

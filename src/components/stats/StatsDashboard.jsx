@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import {
   getStatsOverview,
@@ -10,7 +10,7 @@ import {
 import "./StatsDashboard.css";
 
 const DIFFICULTY_LABELS = {
-  basico: "Basico",
+  basico: "Básico",
   intermedio: "Intermedio",
   avanzado: "Avanzado",
 };
@@ -20,6 +20,11 @@ const DIFFICULTY_COLORS = {
   intermedio: "#fd7e14",
   avanzado: "#dc3545",
 };
+
+// Config de Plotly compartida por todos los gráficos. Se define una sola vez
+// (fuera del componente) para que su identidad no cambie en cada render: si
+// cambiara, react-plotly.js volvería a dibujar todos los gráficos cada vez.
+const PLOT_CONFIG = { displayModeBar: false, responsive: true };
 
 function anonymize(email) {
   if (!email) return "-";
@@ -53,24 +58,50 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
     }
   }, [apiUrl, isAdmin]);
 
-  const loadOverview = useCallback(async () => {
+  // Carga única: el resumen y los agregados extra se piden juntos y el
+  // tablero se dibuja una sola vez, cuando ya llegó todo. Antes se cargaban
+  // en dos tandas (primero el resumen, después los extra) y los gráficos se
+  // montaban de a partes; "Actualizar" solo recargaba el resumen.
+  // Cada pedido falla de forma independiente: un error en un agregado extra
+  // no tapa el resumen principal.
+  const requestIdRef = useRef(0);
+
+  const loadAll = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     setError("");
-    try {
-      const r = await getStatsOverview(apiUrl, {
-        teacherId: teacherId || undefined,
-      });
-      setData(r);
-    } catch (e) {
-      const msg = e.message || "";
+    const args = { teacherId: teacherId || undefined };
+    const [overviewRes, byClassRes, timeDistRes, byChallengeRes] =
+      await Promise.allSettled([
+        getStatsOverview(apiUrl, args),
+        getStatsByClass(apiUrl, args),
+        getStatsTimeDistribution(apiUrl, args),
+        getStatsByChallenge(apiUrl, args),
+      ]);
+    // Si mientras tanto se pidió otra carga (cambio de filtro), se descarta
+    // esta respuesta para no pisar datos más nuevos con otros viejos.
+    if (requestId !== requestIdRef.current) return;
+
+    if (overviewRes.status === "fulfilled") {
+      setData(overviewRes.value);
+    } else {
+      const msg = (overviewRes.reason && overviewRes.reason.message) || "";
       setError(
         msg === "Failed to fetch"
-          ? "No hay alumnos registrados."
+          ? "No se pudo conectar con el servidor. Probá de nuevo en unos segundos."
           : msg || "Error al cargar estadísticas."
       );
-    } finally {
-      setLoading(false);
     }
+    setByClass(
+      byClassRes.status === "fulfilled" ? byClassRes.value.classes || [] : []
+    );
+    setTimeDist(timeDistRes.status === "fulfilled" ? timeDistRes.value : null);
+    setByChallenge(
+      byChallengeRes.status === "fulfilled"
+        ? byChallengeRes.value.challenges || []
+        : []
+    );
+    setLoading(false);
   }, [apiUrl, teacherId]);
 
   useEffect(() => {
@@ -78,42 +109,14 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
   }, [loadTeachers]);
 
   useEffect(() => {
-    loadOverview();
-  }, [loadOverview]);
+    loadAll();
+  }, [loadAll]);
 
-  // Cargas extra en paralelo. Fallan silenciosamente para no
-  // tapar el overview principal.
-  const loadExtras = useCallback(async () => {
-    const args = { teacherId: teacherId || undefined };
-    try {
-      const r = await getStatsByClass(apiUrl, args);
-      setByClass(r.classes || []);
-    } catch (_) {
-      setByClass([]);
-    }
-    try {
-      const r = await getStatsTimeDistribution(apiUrl, args);
-      setTimeDist(r);
-    } catch (_) {
-      setTimeDist(null);
-    }
-    try {
-      const r = await getStatsByChallenge(apiUrl, args);
-      setByChallenge(r.challenges || []);
-    } catch (_) {
-      setByChallenge([]);
-    }
-  }, [apiUrl, teacherId]);
-
-  useEffect(() => {
-    loadExtras();
-  }, [loadExtras]);
-
-  const perStudent = data ? data.per_student || [] : [];
-  const byDifficulty = data ? data.by_difficulty || {} : {};
-  const timeline = data ? data.timeline || [] : [];
-  const summary = data ? data.summary || {} : {};
-  const timingAvg = data ? data.timing_avg || {} : {};
+  const perStudent = useMemo(() => (data && data.per_student) || [], [data]);
+  const byDifficulty = useMemo(() => (data && data.by_difficulty) || {}, [data]);
+  const timeline = useMemo(() => (data && data.timeline) || [], [data]);
+  const timingAvg = useMemo(() => (data && data.timing_avg) || {}, [data]);
+  const summary = (data && data.summary) || {};
 
   // ---- Grafico 1: barras horizontales, desafios completados por alumno ----
   const completedChart = useMemo(() => {
@@ -126,13 +129,13 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
           x: sorted.map((s) => s.completed),
           y: sorted.map((s) => anonymize(s.email)),
           marker: { color: "#0d6efd" },
-          hovertemplate: "%{y}: %{x} desafios<extra></extra>",
+          hovertemplate: "%{y}: %{x} desafíos<extra></extra>",
         },
       ],
       layout: {
-        title: { text: "Desafios completados por alumno", font: { size: 14 } },
+        title: { text: "Desafíos completados por alumno", font: { size: 14 } },
         margin: { l: 100, r: 20, t: 40, b: 40 },
-        xaxis: { title: "Desafios", dtick: 1 },
+        xaxis: { title: "Desafíos", dtick: 1 },
         height: Math.max(250, sorted.length * 28 + 100),
         paper_bgcolor: "transparent",
         plot_bgcolor: "transparent",
@@ -186,7 +189,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
       ],
       layout: {
         title: {
-          text: "Distribucion por dificultad",
+          text: "Distribución por dificultad",
           font: { size: 14 },
         },
         margin: { l: 20, r: 20, t: 40, b: 20 },
@@ -216,7 +219,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
       ],
       layout: {
         title: {
-          text: "Evolucion temporal (ultimos 30 dias)",
+          text: "Evolución temporal (últimos 30 días)",
           font: { size: 14 },
         },
         margin: { l: 40, r: 20, t: 40, b: 60 },
@@ -244,7 +247,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
       data: [
         {
           type: "bar",
-          name: "Primer desafio",
+          name: "Primer desafío",
           x: labels,
           y: firsts,
           marker: { color: "#6f42c1" },
@@ -252,11 +255,11 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
         },
         {
           type: "bar",
-          name: "Ultimo desafio",
+          name: "Último desafío",
           x: labels,
           y: lasts,
           marker: { color: "#20c997" },
-          hovertemplate: "%{x} (ultimo): %{y} min<extra></extra>",
+          hovertemplate: "%{x} (último): %{y} min<extra></extra>",
         },
       ],
       layout: {
@@ -302,7 +305,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
         },
       ],
       layout: {
-        title: { text: "Comparativa entre clases", font: { size: 14 } },
+        title: { text: "Comparativa entre comisiones", font: { size: 14 } },
         barmode: "group",
         margin: { l: 50, r: 50, t: 40, b: 80 },
         xaxis: { tickangle: -25, automargin: true },
@@ -387,12 +390,12 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
           ),
           textposition: "outside",
           hovertemplate:
-            "%{y}<br>Pass rate: %{x}%<br>%{text}<extra></extra>",
+            "%{y}<br>Aprobación: %{x}%<br>%{text}<extra></extra>",
         },
       ],
       layout: {
         title: {
-          text: "Desempeño por desafío (pass rate %)",
+          text: "Desempeño por desafío (% de intentos aprobados)",
           font: { size: 14 },
         },
         margin: { l: 220, r: 80, t: 40, b: 40 },
@@ -409,7 +412,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
   return (
     <div className="stats-dashboard">
       <div className="stats-header">
-        <h2>Estadisticas</h2>
+        <h2>Estadísticas</h2>
         {isAdmin && (
           <div className="stats-filter">
             <label>Ver alumnos de:</label>
@@ -421,18 +424,17 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
               {teachers.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.email}
-                  {t.class_code ? ` (${t.class_code})` : ""}
                 </option>
               ))}
             </select>
           </div>
         )}
-        <button className="btn btn-outline-primary" onClick={loadOverview}>
+        <button className="btn btn-outline-primary" onClick={loadAll}>
           Actualizar
         </button>
       </div>
 
-      {loading && <p className="stats-loading">Cargando estadisticas...</p>}
+      {loading && <p className="stats-loading">Cargando estadísticas...</p>}
       {error && <div className="stats-error">{error}</div>}
 
       {!loading && !error && (
@@ -448,7 +450,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
               <span className="stats-summary-value">
                 {summary.total_completed || 0}
               </span>
-              <span className="stats-summary-label">Desafios aprobados</span>
+              <span className="stats-summary-label">Desafíos aprobados</span>
             </div>
             <div className="stats-summary-card">
               <span className="stats-summary-value">
@@ -460,7 +462,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
 
           {isEmpty ? (
             <p className="stats-empty">
-              No hay datos de progreso en este scope todavia.
+              Todavía no hay datos de progreso para mostrar.
             </p>
           ) : (
             <div className="stats-charts-grid">
@@ -468,7 +470,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
                 <Plot
                   data={completedChart.data}
                   layout={completedChart.layout}
-                  config={{ displayModeBar: false, responsive: true }}
+                  config={PLOT_CONFIG}
                   style={{ width: "100%" }}
                   useResizeHandler
                 />
@@ -477,7 +479,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
                 <Plot
                   data={rankingChart.data}
                   layout={rankingChart.layout}
-                  config={{ displayModeBar: false, responsive: true }}
+                  config={PLOT_CONFIG}
                   style={{ width: "100%" }}
                   useResizeHandler
                 />
@@ -486,7 +488,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
                 <Plot
                   data={difficultyChart.data}
                   layout={difficultyChart.layout}
-                  config={{ displayModeBar: false, responsive: true }}
+                  config={PLOT_CONFIG}
                   style={{ width: "100%" }}
                   useResizeHandler
                 />
@@ -495,7 +497,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
                 <Plot
                   data={timelineChart.data}
                   layout={timelineChart.layout}
-                  config={{ displayModeBar: false, responsive: true }}
+                  config={PLOT_CONFIG}
                   style={{ width: "100%" }}
                   useResizeHandler
                 />
@@ -504,7 +506,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
                 <Plot
                   data={timingChart.data}
                   layout={timingChart.layout}
-                  config={{ displayModeBar: false, responsive: true }}
+                  config={PLOT_CONFIG}
                   style={{ width: "100%" }}
                   useResizeHandler
                 />
@@ -518,7 +520,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
                   <Plot
                     data={classesChart.data}
                     layout={classesChart.layout}
-                    config={{ displayModeBar: false, responsive: true }}
+                    config={PLOT_CONFIG}
                     style={{ width: "100%" }}
                     useResizeHandler
                   />
@@ -531,7 +533,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
                   <Plot
                     data={timeDistChart.data}
                     layout={timeDistChart.layout}
-                    config={{ displayModeBar: false, responsive: true }}
+                    config={PLOT_CONFIG}
                     style={{ width: "100%" }}
                     useResizeHandler
                   />
@@ -544,7 +546,7 @@ export default function StatsDashboard({ apiUrl, isAdmin }) {
                   <Plot
                     data={challengePerfChart.data}
                     layout={challengePerfChart.layout}
-                    config={{ displayModeBar: false, responsive: true }}
+                    config={PLOT_CONFIG}
                     style={{ width: "100%" }}
                     useResizeHandler
                   />

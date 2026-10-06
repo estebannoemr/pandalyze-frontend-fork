@@ -26,6 +26,7 @@ function ClassCard({ klass, allChallenges, onUpdated, onDeleted }) {
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setName(klass.name);
@@ -105,7 +106,7 @@ function ClassCard({ klass, allChallenges, onUpdated, onDeleted }) {
   const remove = async () => {
     if (
       !window.confirm(
-        `Borrar la clase "${klass.name}"? Los alumnos quedarán sin clase pero conservan sus resultados.`
+        `¿Borrar la comisión "${klass.name}"? Los alumnos quedarán sin comisión pero conservan sus resultados.`
       )
     )
       return;
@@ -120,6 +121,8 @@ function ClassCard({ klass, allChallenges, onUpdated, onDeleted }) {
   const copyCode = async () => {
     try {
       await navigator.clipboard.writeText(klass.class_code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (_) {}
   };
 
@@ -135,16 +138,23 @@ function ClassCard({ klass, allChallenges, onUpdated, onDeleted }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={120}
-            placeholder="Nombre de la clase"
+            placeholder="Nombre de la comisión"
           />
         ) : (
           <h4 className="myclasses-card-title">{klass.name}</h4>
         )}
         <div className="myclasses-code-block">
-          <span className="myclasses-code-label">Código:</span>
+          <span className="myclasses-code-label">Código de inscripción:</span>
           <code className="myclasses-code-value" onClick={copyCode} title="Copiar">
             {klass.class_code}
           </code>
+          <button
+            type="button"
+            className="btn btn-outline-secondary btn-sm"
+            onClick={copyCode}
+          >
+            {copied ? "¡Copiado!" : "Copiar"}
+          </button>
         </div>
       </div>
 
@@ -293,7 +303,7 @@ function CreateClassForm({ allChallenges, onCreated }) {
       setSelectAll(true);
       setOpen(false);
     } catch (err) {
-      setError(err.message || "No se pudo crear la clase.");
+      setError(err.message || "No se pudo crear la comisión.");
     } finally {
       setSaving(false);
     }
@@ -302,14 +312,14 @@ function CreateClassForm({ allChallenges, onCreated }) {
   if (!open) {
     return (
       <button className="btn btn-primary" onClick={() => setOpen(true)}>
-        ➕ Crear nueva clase
+        ➕ Crear nueva comisión
       </button>
     );
   }
 
   return (
     <form className="myclasses-create-form" onSubmit={submit}>
-      <h4>Nueva clase</h4>
+      <h4>Nueva comisión</h4>
       <label className="myclasses-create-label">
         Nombre
         <input
@@ -341,7 +351,7 @@ function CreateClassForm({ allChallenges, onCreated }) {
           type="submit"
           disabled={saving || !name.trim()}
         >
-          {saving ? "Creando…" : "Crear clase"}
+          {saving ? "Creando…" : "Crear comisión"}
         </button>
         <button
           className="btn btn-outline-secondary btn-sm"
@@ -389,7 +399,7 @@ export default function MyClasses({ apiUrl }) {
       setAllChallenges(sortedCh);
       setClasses(list || []);
     } catch (e) {
-      setError(e.message || "No se pudieron cargar las clases.");
+      setError(e.message || "No se pudieron cargar las comisiones.");
     } finally {
       setLoading(false);
     }
@@ -413,24 +423,31 @@ export default function MyClasses({ apiUrl }) {
   return (
     <div className="myclasses-section">
       <div className="myclasses-header">
-        <h2>Mis clases</h2>
+        <h2>Mis comisiones</h2>
         <button className="btn btn-outline-primary btn-sm" onClick={refresh}>
           Actualizar
         </button>
       </div>
+
+      <p className="myclasses-intro">
+        Cada comisión tiene su propio código de inscripción y su propia lista
+        de desafíos. Compartí el código con tus alumnos: lo ingresan al
+        registrarse o desde "Mi perfil" y, a partir de ese momento, ven solo
+        los desafíos que elegiste para esa comisión.
+      </p>
 
       <CreateClassForm
         allChallenges={allChallenges}
         onCreated={handleCreated}
       />
 
-      {loading && <p>Cargando clases…</p>}
+      {loading && <p>Cargando comisiones…</p>}
       {error && <div className="myclasses-error">{error}</div>}
 
       {!loading && !error && classes.length === 0 && (
         <p className="myclasses-empty">
-          Todavía no tenés clases. Creá la primera con el botón "Crear nueva
-          clase" y compartí el código con tus alumnos.
+          Todavía no tenés comisiones. Creá la primera con el botón "Crear
+          nueva comisión" y compartí su código con tus alumnos.
         </p>
       )}
 

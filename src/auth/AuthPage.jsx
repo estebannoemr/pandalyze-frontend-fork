@@ -108,7 +108,7 @@ export default function AuthPage({ onCancel }) {
             ? "Te enviamos un enlace para que puedas restablecer tu contrase\u00f1a."
             : mode === "reset"
             ? "Ingres\u00e1 una nueva contrase\u00f1a para tu cuenta."
-            : "Inicia sesion para acceder a los desafios y guardar tu progreso."}
+            : "Iniciá sesión para acceder a los desafíos y guardar tu progreso."}
         </p>
 
         {mode !== "forgot" && mode !== "reset" && (
@@ -118,7 +118,7 @@ export default function AuthPage({ onCancel }) {
               className={"auth-tab " + (mode === "login" ? "active" : "")}
               onClick={() => switchMode("login")}
             >
-              Iniciar sesion
+              Iniciar sesión
             </button>
             <button
               type="button"
@@ -163,7 +163,7 @@ export default function AuthPage({ onCancel }) {
             mode === "register" ||
             mode === "reset") && (
             <label>
-              {mode === "reset" ? "Nueva contrase\u00f1a" : "Contrasena"}
+              {mode === "reset" ? "Nueva contrase\u00f1a" : "Contraseña"}
               <input
                 type="password"
                 required
@@ -181,7 +181,7 @@ export default function AuthPage({ onCancel }) {
 
           {mode === "register" && (
             <label>
-              Codigo de clase <span className="auth-optional">(opcional)</span>
+              Código de comisión <span className="auth-optional">(opcional)</span>
               <input
                 type="text"
                 maxLength={16}
@@ -206,7 +206,7 @@ export default function AuthPage({ onCancel }) {
             {submitting
               ? "Procesando..."
               : mode === "login"
-              ? "Iniciar sesion"
+              ? "Iniciar sesión"
               : mode === "register"
               ? "Crear cuenta"
               : mode === "forgot"

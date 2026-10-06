@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
     (async () => {
       try {
         const r = await authFetch(API_URL + "/auth/me");
-        if (!r.ok) throw new Error("Sesion invalida");
+        if (!r.ok) throw new Error("Sesión inválida");
         const data = await r.json();
         if (!cancelled) setUser(data.user);
       } catch (_) {
@@ -70,7 +70,7 @@ export function AuthProvider({ children }) {
       });
       const data = await r.json().catch(() => ({}));
       if (!r.ok) {
-        const msg = (data && data.error) || "Error al iniciar sesion.";
+        const msg = (data && data.error) || "Error al iniciar sesión.";
         setAuthError(msg);
         throw new Error(msg);
       }

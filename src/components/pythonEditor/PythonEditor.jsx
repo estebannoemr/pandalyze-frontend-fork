@@ -5,6 +5,13 @@ import "./styles.css";
 import { authFetch } from "../../auth/authFetch";
 import BlocksService from "../blocksEditor/services/BlocksService";
 
+// Conversor "Código Python a bloques" (solo docentes): DESACTIVADO.
+// Queda fuera del alcance de la tesina y se reserva como posible mejora
+// futura. No se borró nada: el modal (PythonToBlocksModal.jsx), el parser
+// (services/pythonToBlocks.js) y el cableado en App.js siguen intactos.
+// Para volver a mostrar el botón, cambiar este valor a true.
+const PY2BLOCKS_HABILITADO = false;
+
 const PythonEditor = ({
   frontendCode,
   backendCode,
@@ -89,13 +96,13 @@ const PythonEditor = ({
             marginBottom: "16px",
           }}
         >
-          {isTeacher && (
+          {PY2BLOCKS_HABILITADO && isTeacher && (
             <button
               className="btn btn-outline-primary"
               onClick={onOpenPy2Blocks}
-              title="Convertir codigo Python en bloques (solo docentes)"
+              title="Convertir código Python en bloques (solo docentes)"
             >
-              Codigo Python a bloques
+              Código Python a bloques
             </button>
           )}
           <button

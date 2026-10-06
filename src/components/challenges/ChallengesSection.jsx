@@ -25,6 +25,7 @@ const CATEGORY_LABELS = {
   agrupamiento: "Agrupamiento",
   estadisticas: "Estadísticas",
   visualizacion: "Visualización",
+  ordenamiento: "Ordenamiento",
 };
 
 const ensureCsvExtension = (name) => {
@@ -52,6 +53,30 @@ const getEmptyChallengeForm = () => ({
   suggestion: "",
   time_limit_seconds: "",
 });
+
+// Campo del formulario de desafíos: la etiqueta y la ayuda quedan siempre
+// visibles arriba del control (no dependen del placeholder, que desaparece
+// al escribir o al volver a editar un desafío ya cargado).
+const FormField = ({ label, help, optional, required, children }) => (
+  <label className="challenge-form-field">
+    <span className="challenge-form-label">
+      {label}
+      {required && <span className="challenge-form-required"> *</span>}
+      {optional && <span className="challenge-form-optional"> (opcional)</span>}
+    </span>
+    {help && <span className="challenge-form-help">{help}</span>}
+    {children}
+  </label>
+);
+
+const CATEGORY_OPTIONS = [
+  "lectura",
+  "filtrado",
+  "agrupamiento",
+  "ordenamiento",
+  "estadisticas",
+  "visualizacion",
+];
 
 // Lógica de desbloqueo progresivo
 const isUnlocked = (challenge, completedIds, allChallenges) => {
@@ -167,7 +192,7 @@ const ChallengesSection = ({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiUrl, loadChallenges]);
+  }, [apiUrl, loadChallenges, user && user.class_id]);
 
   // Cuando cambia el desafío activo (por ejemplo al completar uno), refrescamos
   // el estado para reflejar badges/niveles actualizados.
@@ -348,41 +373,171 @@ const ChallengesSection = ({
     onSubmit,
   }) => (
     <form className="challenge-create-form challenge-inline-editor" onSubmit={onSubmit}>
+      <p className="challenge-form-intro">
+        Los campos marcados con <span className="challenge-form-required">*</span> son
+        obligatorios. El estudiante ve la consigna, las instrucciones, la pista y la
+        teoría; la solución y el resultado esperado se usan para corregir.
+      </p>
+
+      <h5 className="challenge-form-section-title">1. Datos generales</h5>
       <div className="challenge-create-grid">
-        <input
-          type="text"
-          placeholder="Título"
-          value={formState.title}
-          onChange={(e) => setFormState((p) => ({ ...p, title: e.target.value }))}
+        <FormField
+          label="Título"
+          required
+          help="Nombre corto que aparece en la tarjeta del desafío."
+        >
+          <input
+            type="text"
+            placeholder="Ej.: ¿Cuántas filas tiene el dataset?"
+            value={formState.title}
+            onChange={(e) => setFormState((p) => ({ ...p, title: e.target.value }))}
+            onInvalid={setSpanishRequiredMessage}
+            onInput={clearSpanishRequiredMessage}
+            required
+          />
+        </FormField>
+        <FormField
+          label="Dificultad"
+          required
+          help="Define en qué nivel aparece el desafío."
+        >
+          <select
+            value={formState.difficulty}
+            onChange={(e) => setFormState((p) => ({ ...p, difficulty: e.target.value }))}
+          >
+            <option value="basico">Básico</option>
+            <option value="intermedio">Intermedio</option>
+            <option value="avanzado">Avanzado</option>
+          </select>
+        </FormField>
+        <FormField
+          label="Categoría"
+          optional
+          help="Tipo de operación que se practica. Sirve para filtrar el catálogo."
+        >
+          <select
+            value={formState.category}
+            onChange={(e) => setFormState((p) => ({ ...p, category: e.target.value }))}
+          >
+            <option value="">Sin categoría</option>
+            {CATEGORY_OPTIONS.map((cat) => (
+              <option key={cat} value={cat}>
+                {CATEGORY_LABELS[cat] || cat}
+              </option>
+            ))}
+            {formState.category && !CATEGORY_OPTIONS.includes(formState.category) && (
+              <option value={formState.category}>{formState.category}</option>
+            )}
+          </select>
+        </FormField>
+        <FormField
+          label="Puntos"
+          required
+          help="Se suman la primera vez que se resuelve. Sugerido: básico 10, intermedio 25, avanzado 50."
+        >
+          <input
+            type="number"
+            min="1"
+            max="1000"
+            value={formState.points}
+            onChange={(e) => setFormState((p) => ({ ...p, points: e.target.value }))}
+          />
+        </FormField>
+        <FormField
+          label="Tiempo límite (segundos)"
+          optional
+          help="Solo para desafíos contrarreloj: el estudiante ve una cuenta regresiva. Dejalo vacío si no querés límite."
+        >
+          <input
+            type="number"
+            min="1"
+            placeholder="Ej.: 120"
+            value={formState.time_limit_seconds}
+            onChange={(e) => setFormState((p) => ({ ...p, time_limit_seconds: e.target.value }))}
+          />
+        </FormField>
+      </div>
+
+      <h5 className="challenge-form-section-title">2. Consigna</h5>
+      <FormField
+        label="Consigna"
+        required
+        help="Qué tiene que averiguar el estudiante. Es el texto principal del desafío."
+      >
+        <textarea
+          placeholder="Ej.: El dataset tiene información de estudiantes. Averiguá cuántos registros tiene en total."
+          value={formState.description}
+          onChange={(e) => setFormState((p) => ({ ...p, description: e.target.value }))}
           onInvalid={setSpanishRequiredMessage}
           onInput={clearSpanishRequiredMessage}
           required
         />
-        <select
-          value={formState.difficulty}
-          onChange={(e) => setFormState((p) => ({ ...p, difficulty: e.target.value }))}
-        >
-          <option value="basico">Básico</option>
-          <option value="intermedio">Intermedio</option>
-          <option value="avanzado">Avanzado</option>
-        </select>
+      </FormField>
+      <FormField
+        label="Instrucciones"
+        optional
+        help="Pasos sugeridos para resolverlo, uno por línea. Se muestran como lista numerada."
+      >
+        <textarea
+          placeholder={"Ej.:\nCargá el CSV con el bloque de leer CSV.\nImprimí el resultado en consola."}
+          value={formState.instructions}
+          onChange={(e) => setFormState((p) => ({ ...p, instructions: e.target.value }))}
+        />
+      </FormField>
+      <FormField
+        label="Pista"
+        optional
+        help="Ayuda que el estudiante puede desplegar si se traba. Conviene que oriente sin dar la respuesta."
+      >
+        <textarea
+          placeholder="Ej.: Buscá en la categoría Información un bloque que devuelva las dimensiones."
+          value={formState.hint}
+          onChange={(e) => setFormState((p) => ({ ...p, hint: e.target.value }))}
+        />
+      </FormField>
+      <FormField
+        label="Enlace a teoría"
+        optional
+        help="Material de consulta (documentación, apunte o video) que se abre en otra pestaña."
+      >
+        <input
+          type="url"
+          placeholder="https://..."
+          value={formState.theory_url}
+          onChange={(e) => setFormState((p) => ({ ...p, theory_url: e.target.value }))}
+        />
+      </FormField>
+
+      <h5 className="challenge-form-section-title">3. Dataset</h5>
+      <div className="challenge-create-source-toggle">
+        <span className="challenge-form-label">¿De dónde sale el CSV?</span>
+        <label>
+          <input
+            type="radio"
+            name={`${submitLabel}-csv-source-mode`}
+            checked={csvSourceModeValue === "content"}
+            onChange={() => setCsvSourceModeValue("content")}
+          />
+          Subir un archivo o pegar el contenido
+        </label>
+        <label>
+          <input
+            type="radio"
+            name={`${submitLabel}-csv-source-mode`}
+            checked={csvSourceModeValue === "link"}
+            onChange={() => setCsvSourceModeValue("link")}
+          />
+          Usar un enlace (URL)
+        </label>
+      </div>
+      <FormField
+        label="Nombre del archivo CSV"
+        required
+        help="Nombre con el que el estudiante verá el dataset en el bloque de leer CSV."
+      >
         <input
           type="text"
-          placeholder="Categoría (lectura, filtrado, etc.)"
-          value={formState.category}
-          onChange={(e) => setFormState((p) => ({ ...p, category: e.target.value }))}
-        />
-        <input
-          type="number"
-          min="1"
-          max="1000"
-          placeholder="Puntos"
-          value={formState.points}
-          onChange={(e) => setFormState((p) => ({ ...p, points: e.target.value }))}
-        />
-        <input
-          type="text"
-          placeholder="Nombre de archivo CSV"
+          placeholder="Ej.: estudiantes.csv"
           value={formState.csv_filename}
           onChange={(e) => setFormState((p) => ({ ...p, csv_filename: e.target.value }))}
           onBlur={(e) =>
@@ -395,66 +550,14 @@ const ChallengesSection = ({
           onInput={clearSpanishRequiredMessage}
           required
         />
-        <input
-          type="number"
-          min="1"
-          placeholder="Tiempo límite en segundos (opcional)"
-          value={formState.time_limit_seconds}
-          onChange={(e) => setFormState((p) => ({ ...p, time_limit_seconds: e.target.value }))}
-        />
-      </div>
-
-      <div className="challenge-create-source-toggle">
-        <label>
-          <input
-            type="radio"
-            name={`${submitLabel}-csv-source-mode`}
-            checked={csvSourceModeValue === "content"}
-            onChange={() => setCsvSourceModeValue("content")}
-          />
-          CSV por archivo/contenido
-        </label>
-        <label>
-          <input
-            type="radio"
-            name={`${submitLabel}-csv-source-mode`}
-            checked={csvSourceModeValue === "link"}
-            onChange={() => setCsvSourceModeValue("link")}
-          />
-          CSV por link (URL)
-        </label>
-      </div>
-
-      <textarea
-        placeholder="Descripción"
-        value={formState.description}
-        onChange={(e) => setFormState((p) => ({ ...p, description: e.target.value }))}
-        onInvalid={setSpanishRequiredMessage}
-        onInput={clearSpanishRequiredMessage}
-        required
-      />
-      <textarea
-        placeholder="Instrucciones (una por línea)"
-        value={formState.instructions}
-        onChange={(e) => setFormState((p) => ({ ...p, instructions: e.target.value }))}
-      />
-      <textarea
-        placeholder="Hint (opcional)"
-        value={formState.hint}
-        onChange={(e) => setFormState((p) => ({ ...p, hint: e.target.value }))}
-      />
+      </FormField>
       {csvSourceModeValue === "content" ? (
         <>
-          <textarea
-            placeholder="CSV content"
-            value={formState.csv_content}
-            onChange={(e) => setFormState((p) => ({ ...p, csv_content: e.target.value }))}
-            onInvalid={setSpanishRequiredMessage}
-            onInput={clearSpanishRequiredMessage}
-            required
-          />
-          <label className="challenge-create-file-label">
-            Cargar CSV desde archivo
+          <FormField
+            label="Cargar el CSV desde un archivo"
+            optional
+            help="Al elegir un archivo se completan solos el nombre y el contenido."
+          >
             <input
               type="file"
               accept=".csv,text/csv"
@@ -465,56 +568,104 @@ const ChallengesSection = ({
                 )
               }
             />
-          </label>
+          </FormField>
+          <FormField
+            label="Contenido del CSV"
+            required
+            help="La primera fila tiene que tener los nombres de las columnas."
+          >
+            <textarea
+              placeholder={"Ej.:\nnombre,edad\nAna,15\nLuis,16"}
+              value={formState.csv_content}
+              onChange={(e) => setFormState((p) => ({ ...p, csv_content: e.target.value }))}
+              onInvalid={setSpanishRequiredMessage}
+              onInput={clearSpanishRequiredMessage}
+              required
+            />
+          </FormField>
         </>
       ) : (
-        <input
-          type="url"
-          placeholder="Link público del CSV (https://...)"
-          value={formState.csv_url}
-          onChange={(e) => setFormState((p) => ({ ...p, csv_url: e.target.value }))}
+        <FormField
+          label="Enlace público al CSV"
+          required
+          help="Enlace de descarga directa. También sirven enlaces compartidos de Google Drive o Google Sheets."
+        >
+          <input
+            type="url"
+            placeholder="https://..."
+            value={formState.csv_url}
+            onChange={(e) => setFormState((p) => ({ ...p, csv_url: e.target.value }))}
+            onInvalid={setSpanishRequiredMessage}
+            onInput={clearSpanishRequiredMessage}
+            required
+          />
+        </FormField>
+      )}
+
+      <h5 className="challenge-form-section-title">4. Corrección automática</h5>
+      <FormField
+        label="Solución de referencia (Python)"
+        required
+        help="Código que resuelve el desafío. Armalo con bloques en el Editor y copiá el código Python generado. Se compara con la respuesta del estudiante y se le muestra si pide ver la solución."
+      >
+        <textarea
+          className="challenge-form-code"
+          placeholder={"Ej.:\ndf = read_csv(csv_id)\nprint(df.shape)"}
+          value={formState.solution_code}
+          onChange={(e) => setFormState((p) => ({ ...p, solution_code: e.target.value }))}
           onInvalid={setSpanishRequiredMessage}
           onInput={clearSpanishRequiredMessage}
           required
         />
-      )}
-      <textarea
-        placeholder="Palabra clave esperada en output"
-        value={formState.expected_keyword}
-        onChange={(e) => setFormState((p) => ({ ...p, expected_keyword: e.target.value }))}
-        onInvalid={setSpanishRequiredMessage}
-        onInput={clearSpanishRequiredMessage}
+      </FormField>
+      <FormField
+        label="Resultado esperado"
         required
-      />
-      <textarea
-        placeholder="Solución de referencia (Python)"
-        value={formState.solution_code}
-        onChange={(e) => setFormState((p) => ({ ...p, solution_code: e.target.value }))}
-        onInvalid={setSpanishRequiredMessage}
-        onInput={clearSpanishRequiredMessage}
-        required
-      />
-      <textarea
-        placeholder="Feedback correcto"
-        value={formState.feedback_correct}
-        onChange={(e) => setFormState((p) => ({ ...p, feedback_correct: e.target.value }))}
-      />
-      <textarea
-        placeholder="Feedback incorrecto"
-        value={formState.feedback_incorrect}
-        onChange={(e) => setFormState((p) => ({ ...p, feedback_incorrect: e.target.value }))}
-      />
-      <textarea
-        placeholder="Sugerencia (opcional)"
-        value={formState.suggestion}
-        onChange={(e) => setFormState((p) => ({ ...p, suggestion: e.target.value }))}
-      />
-      <input
-        type="url"
-        placeholder="URL de teoría (opcional)"
-        value={formState.theory_url}
-        onChange={(e) => setFormState((p) => ({ ...p, theory_url: e.target.value }))}
-      />
+        help="Texto que tiene que aparecer en la consola para dar el desafío por resuelto. Ejecutá la solución de referencia y copiá de la salida un valor bien específico."
+      >
+        <textarea
+          className="challenge-form-code"
+          placeholder="Ej.: (25000, 16)"
+          value={formState.expected_keyword}
+          onChange={(e) => setFormState((p) => ({ ...p, expected_keyword: e.target.value }))}
+          onInvalid={setSpanishRequiredMessage}
+          onInput={clearSpanishRequiredMessage}
+          required
+        />
+      </FormField>
+
+      <h5 className="challenge-form-section-title">5. Mensajes para el estudiante</h5>
+      <FormField
+        label="Mensaje cuando la respuesta es correcta"
+        optional
+        help="Se muestra al aprobar. Podés aprovecharlo para explicar qué significa el resultado."
+      >
+        <textarea
+          value={formState.feedback_correct}
+          onChange={(e) => setFormState((p) => ({ ...p, feedback_correct: e.target.value }))}
+        />
+      </FormField>
+      <FormField
+        label="Mensaje cuando la respuesta es incorrecta"
+        optional
+        help="Se muestra cuando la salida no coincide con el resultado esperado."
+      >
+        <textarea
+          value={formState.feedback_incorrect}
+          onChange={(e) => setFormState((p) => ({ ...p, feedback_incorrect: e.target.value }))}
+        />
+      </FormField>
+      <FormField
+        label="Sugerencia"
+        optional
+        help="Orientación extra que acompaña al mensaje de error, para encarar el próximo intento."
+      >
+        <textarea
+          placeholder="Ej.: Revisá que estés imprimiendo el DataFrame completo y no una sola columna."
+          value={formState.suggestion}
+          onChange={(e) => setFormState((p) => ({ ...p, suggestion: e.target.value }))}
+        />
+      </FormField>
 
       {errorMessage && <div className="challenges-error">{errorMessage}</div>}
       {okMessage && <div className="challenge-create-ok">{okMessage}</div>}
@@ -608,17 +759,57 @@ const ChallengesSection = ({
 
   return (
     <div className="challenges-section">
-      {/* Perfil de gamificación */}
-      <GamificationProfile
-        totalPoints={totalPoints}
-        level={level}
-        levelTitle={levelTitle}
-        nextLevelPoints={nextLevelPoints}
-        badges={badges}
-        allBadges={allBadges}
-        completedCount={completedIds.length}
-        totalChallenges={challenges.length}
-      />
+      {/* Perfil de gamificación: solo para estudiantes. Docentes y
+          administradores no acumulan puntos ni emblemas. */}
+      {!isTeacherView && (
+        <GamificationProfile
+          totalPoints={totalPoints}
+          level={level}
+          levelTitle={levelTitle}
+          nextLevelPoints={nextLevelPoints}
+          badges={badges}
+          allBadges={allBadges}
+          completedCount={completedIds.length}
+          totalChallenges={challenges.length}
+        />
+      )}
+
+      {/* Encabezado: deja en claro qué catálogo se está viendo y por qué. */}
+      <div className="challenges-scope-header">
+        {isTeacherView ? (
+          <>
+            <h2 className="challenges-scope-title">Catálogo de desafíos</h2>
+            <p className="challenges-scope-text">
+              Ves el catálogo completo.{" "}
+              {user && user.role === "docente"
+                ? 'Qué desafíos ve cada comisión se elige en la pestaña "Mis comisiones". '
+                : ""}
+              Podés abrir cualquier desafío con "Ver" para probarlo: tus
+              intentos no suman puntos ni emblemas.
+            </p>
+          </>
+        ) : user && user.class_name ? (
+          <>
+            <h2 className="challenges-scope-title">
+              Desafíos de la comisión "{user.class_name}"
+            </h2>
+            <p className="challenges-scope-text">
+              {user.teacher_name
+                ? `Estos son los desafíos que ${user.teacher_name} eligió para tu comisión.`
+                : "Estos son los desafíos que tu docente eligió para tu comisión."}
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="challenges-scope-title">Desafíos</h2>
+            <p className="challenges-scope-text">
+              Todavía no estás en ninguna comisión, por eso ves el catálogo
+              completo. Si tu docente te dio un código de comisión, cargalo
+              desde "Mi perfil" para ver los desafíos de tu curso.
+            </p>
+          </>
+        )}
+      </div>
 
       {/* Leaderboard anónimo: visible para todos los usuarios autenticados */}
       <Leaderboard apiUrl={apiUrl} />
@@ -746,7 +937,7 @@ const ChallengesSection = ({
                             {challenge.time_limit_seconds > 0 && (
                               <span
                                 className="challenge-time-badge"
-                                title="Desafío contrareloj"
+                                title="Desafío contrarreloj"
                               >
                                 ⏱ {Math.floor(challenge.time_limit_seconds / 60)}:
                                 {String(challenge.time_limit_seconds % 60).padStart(2, "0")}

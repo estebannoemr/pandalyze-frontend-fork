@@ -33,7 +33,7 @@ function renderTimingPair(timing, diff) {
   return `${formatDuration(t.first)} → ${formatDuration(t.last)}`;
 }
 
-export default function TeacherDashboard({ apiUrl, classCode }) {
+export default function TeacherDashboard({ apiUrl }) {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -58,17 +58,12 @@ export default function TeacherDashboard({ apiUrl, classCode }) {
 
   return (
     <div className="teacher-dashboard">
-      {/* Sección de gestión de clases (modelo nuevo: múltiples clases). */}
+      {/* Sección de gestión de comisiones. El código de inscripción de cada
+          comisión se muestra en su tarjeta. */}
       <MyClasses apiUrl={apiUrl} />
 
       <div className="teacher-header">
         <h2>Mis alumnos</h2>
-        {classCode && (
-          <div className="teacher-class-code-block" title="Código legacy de tu clase principal">
-            <span className="teacher-class-code-label">Código legacy:</span>
-            <span className="teacher-class-code-value">{classCode}</span>
-          </div>
-        )}
         <button className="btn btn-outline-primary" onClick={load}>
           Actualizar
         </button>
@@ -79,8 +74,8 @@ export default function TeacherDashboard({ apiUrl, classCode }) {
 
       {!loading && !error && students.length === 0 && (
         <p className="teacher-empty">
-          Todavía no hay alumnos asociados a tu clase. Compartiles tu código
-          de clase para que se registren.
+          Todavía no hay alumnos en tus comisiones. Compartiles el código
+          de la comisión para que se sumen al registrarse o desde "Mi perfil".
         </p>
       )}
 

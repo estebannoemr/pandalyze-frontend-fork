@@ -121,7 +121,7 @@ export const initMapViewerBlock = (csvsData, loadingExampleRef) => {
       this.setNextStatement(true, null);
       this.setColour(230);
       this.setTooltip(
-        "Genera un mapa a partir de un DataFrame. Elegi las columnas de latitud, longitud y categoría desde los menus."
+        "Genera un mapa a partir de un DataFrame. Elegí las columnas de latitud, longitud y categoría desde los menús."
       );
     },
 
