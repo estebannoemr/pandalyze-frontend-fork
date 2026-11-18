@@ -3,6 +3,14 @@ import { listClasses, deleteClass } from "../teacher/classesApi";
 import { adminListUsers } from "../../auth/adminApi";
 import "./AdminClasses.css";
 
+// Para filtrar sin que importen mayúsculas ni tildes ("Comisión" == "comision").
+const normalizar = (txt) =>
+  String(txt || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
 // Vista del admin sobre TODAS las clases del sistema. Read-mostly:
 // muestra docente, código, # alumnos, # desafíos seleccionados, fecha de
 // creación. Permite borrar la clase (los alumnos quedan sin clase, no
@@ -12,6 +20,7 @@ export default function AdminClasses({ apiUrl }) {
   const [teachers, setTeachers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filtro, setFiltro] = useState("");
 
   const refresh = async () => {
     setLoading(true);
@@ -63,6 +72,18 @@ export default function AdminClasses({ apiUrl }) {
     [classes]
   );
 
+  // Comisiones que coinciden con el filtro (nombre, código o email del docente).
+  const classesFiltradas = useMemo(() => {
+    const q = normalizar(filtro);
+    if (!q) return classes;
+    return classes.filter(
+      (c) =>
+        normalizar(c.name).includes(q) ||
+        normalizar(c.class_code).includes(q) ||
+        normalizar(teachers[c.teacher_id]).includes(q)
+    );
+  }, [classes, teachers, filtro]);
+
   return (
     <div className="admin-classes">
       <div className="admin-classes-header">
@@ -86,9 +107,28 @@ export default function AdminClasses({ apiUrl }) {
             </span>
           </div>
 
+          {classes.length > 1 && (
+            <div className="admin-classes-filter">
+              <input
+                type="search"
+                className="form-control form-control-sm"
+                placeholder="Filtrar por nombre, código o docente…"
+                value={filtro}
+                onChange={(e) => setFiltro(e.target.value)}
+              />
+              <span className="admin-classes-filter-count">
+                Mostrando {classesFiltradas.length} de {classes.length}
+              </span>
+            </div>
+          )}
+
           {classes.length === 0 ? (
             <p className="admin-classes-empty">
               Todavía no hay comisiones creadas en el sistema.
+            </p>
+          ) : classesFiltradas.length === 0 ? (
+            <p className="admin-classes-empty">
+              Ninguna comisión coincide con "{filtro}".
             </p>
           ) : (
             <div className="admin-classes-table-wrap">
@@ -104,7 +144,7 @@ export default function AdminClasses({ apiUrl }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {classes.map((c) => (
+                  {classesFiltradas.map((c) => (
                     <tr key={c.id}>
                       <td>{c.name}</td>
                       <td>{teachers[c.teacher_id] || `#${c.teacher_id}`}</td>

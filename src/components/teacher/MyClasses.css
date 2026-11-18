@@ -272,3 +272,21 @@
 .myclasses-code-label {
   font-weight: 600;
 }
+
+/* Filtro de comisiones */
+.myclasses-filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.myclasses-filter input {
+  max-width: 360px;
+}
+
+.myclasses-filter-count {
+  font-size: 0.9rem;
+  color: #495057;
+}

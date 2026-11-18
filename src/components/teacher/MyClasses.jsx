@@ -371,6 +371,14 @@ function CreateClassForm({ allChallenges, onCreated }) {
   );
 }
 
+// Para filtrar sin que importen mayúsculas ni tildes ("Comisión" == "comision").
+const normalizar = (txt) =>
+  String(txt || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
 export default function MyClasses({ apiUrl }) {
   // Truco para que ClassCard pueda usar la apiUrl sin recibirla como prop
   // (evitamos re-renders por cambio de identidad de la prop).
@@ -380,6 +388,7 @@ export default function MyClasses({ apiUrl }) {
   const [allChallenges, setAllChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filtro, setFiltro] = useState("");
 
   const refresh = async () => {
     setLoading(true);
@@ -420,6 +429,15 @@ export default function MyClasses({ apiUrl }) {
     setClasses((prev) => prev.filter((c) => c.id !== id));
   };
 
+  // Comisiones que coinciden con el filtro (por nombre o código de inscripción).
+  const classesFiltradas = useMemo(() => {
+    const q = normalizar(filtro);
+    if (!q) return classes;
+    return classes.filter(
+      (c) => normalizar(c.name).includes(q) || normalizar(c.class_code).includes(q)
+    );
+  }, [classes, filtro]);
+
   return (
     <div className="myclasses-section">
       <div className="myclasses-header">
@@ -451,8 +469,29 @@ export default function MyClasses({ apiUrl }) {
         </p>
       )}
 
+      {!loading && !error && classes.length > 1 && (
+        <div className="myclasses-filter">
+          <input
+            type="search"
+            className="form-control form-control-sm"
+            placeholder="Filtrar comisiones por nombre o código…"
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+          />
+          <span className="myclasses-filter-count">
+            Mostrando {classesFiltradas.length} de {classes.length}
+          </span>
+        </div>
+      )}
+
+      {!loading && !error && classes.length > 0 && classesFiltradas.length === 0 && (
+        <p className="myclasses-empty">
+          Ninguna comisión coincide con "{filtro}".
+        </p>
+      )}
+
       <div className="myclasses-list">
-        {classes.map((klass) => (
+        {classesFiltradas.map((klass) => (
           <ClassCard
             key={klass.id}
             klass={klass}
