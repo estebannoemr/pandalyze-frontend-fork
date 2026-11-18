@@ -288,8 +288,8 @@
 }
 
 .challenge-create-trigger {
-  background: #fff;
-  color: #0d6efd;
+  background: #0d6efd;
+  color: #fff;
   border: 1px solid #0d6efd;
   font-weight: 500;
   padding: 6px 14px;
@@ -297,9 +297,9 @@
 }
 
 .challenge-create-trigger:hover {
-  background: #0d6efd;
+  background: #0b5ed7;
   color: #fff;
-  border-color: #0d6efd;
+  border-color: #0a58ca;
 }
 
 .challenge-create-trigger:focus {
