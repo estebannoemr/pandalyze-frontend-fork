@@ -393,6 +393,7 @@ function App() {
           csvError={challengeCsvError}
           onClose={handleCloseChallenge}
           onMarkCompleted={handleMarkCompleted}
+          isStaff={isTeacher || isAdmin}
         />
       )}
     </div>

@@ -65,6 +65,7 @@ const ChallengeModal = ({
   csvError,
   onClose,
   onMarkCompleted,
+  isStaff = false, // docente/admin: ve la solución de referencia sin condiciones
 }) => {
   const [attempts, setAttempts] = useState(0);
   const [phase, setPhase] = useState("idle"); // idle | validating | passed | failed
@@ -481,14 +482,19 @@ const ChallengeModal = ({
           </div>
         )}
 
-        {/* Solución (sólo tras 3 intentos fallidos o al pedir rendirse) */}
-        {(attempts >= 3 || showSolution) && (
+        {/* Solución (alumno: tras 3 intentos fallidos o al rendirse; docente/admin: siempre) */}
+        {(isStaff || attempts >= 3 || showSolution) && (
           <details
             className="challenge-modal-collapsible"
             open={showSolution}
-            onToggle={(e) => setShowSolution(e.target.open)}
+            onToggle={(e) => {
+              setShowSolution(e.target.open);
+              if (e.target.open && isStaff && !solutionCode) handleRevealSolution();
+            }}
           >
-            <summary>🏳 Ver solución</summary>
+            <summary>
+              {isStaff ? "🔎 Ver solución de referencia" : "🏳 Ver solución"}
+            </summary>
             {!solutionCode ? (
               <p>
                 <button
