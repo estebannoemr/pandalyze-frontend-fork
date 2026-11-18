@@ -42,6 +42,14 @@ const BlocksEditor = ({ updateCode, isLoading, setIsLoading }) => {
 
     const workspace = Blockly.inject("blocklyDiv", {
       toolbox: toolbox,
+      // Sonidos e íconos de Blockly: los sirvo desde public/media (copiados de
+      // node_modules/blockly/media) para no depender de un servidor externo.
+      // Antes Blockly los pedía al link por defecto y, cuando no cargaban, tiraba
+      // "NotSupportedError: Failed to load because no supported source was found".
+      media: `${process.env.PUBLIC_URL || ""}/media/`,
+      // Para volver a usar el link de Blockly: comentar la línea de arriba y
+      // descomentar esta. Después se puede borrar la carpeta public/media.
+      // media: "https://blockly-demo.appspot.com/static/media/",
       zoom: {
         controls: true,
       },
