@@ -4,6 +4,7 @@ import GamificationProfile from "./GamificationProfile";
 import Leaderboard from "./Leaderboard";
 import { formatText } from "./formatText";
 import { useAuth } from "../../auth/AuthContext";
+import { listClasses } from "../teacher/classesApi";
 import {
   getChallenges,
   getGamificationStatus,
@@ -122,6 +123,10 @@ const ChallengesSection = ({
   const [errorMsg, setErrorMsg] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("todos");
   const [categoryFilter, setCategoryFilter] = useState("todos");
+  // Docente/admin: "Ver como" una comisión. "todos" = catálogo completo; si no,
+  // el id de la comisión cuyos desafíos se quieren ver como los vería un alumno.
+  const [staffClasses, setStaffClasses] = useState([]);
+  const [viewAs, setViewAs] = useState("todos");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newChallenge, setNewChallenge] = useState(getEmptyChallengeForm());
   const [editingChallengeId, setEditingChallengeId] = useState(null);
@@ -215,20 +220,46 @@ const ChallengesSection = ({
   // ------------------------------------------------------------------
   // Filtros
   // ------------------------------------------------------------------
+  const esStaff = !!user && (user.role === "docente" || user.role === "admin");
+
+  // Comisiones para el selector "Ver como" (el docente trae las suyas; el admin,
+  // todas).
+  useEffect(() => {
+    if (!esStaff) return;
+    let cancelled = false;
+    listClasses(apiUrl)
+      .then((r) => {
+        if (!cancelled) setStaffClasses(r.classes || []);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [apiUrl, esStaff]);
+
+  const comisionVista = staffClasses.find((c) => String(c.id) === viewAs) || null;
+
+  // Desafíos según la comisión elegida en "Ver como" (sólo docente/admin).
+  const scopedChallenges = useMemo(() => {
+    if (!esStaff || !comisionVista) return challenges;
+    const ids = new Set(comisionVista.selected_challenge_ids || []);
+    return challenges.filter((c) => ids.has(c.id));
+  }, [challenges, esStaff, comisionVista]);
+
   const filteredChallenges = useMemo(() => {
-    return challenges.filter((c) => {
+    return scopedChallenges.filter((c) => {
       if (difficultyFilter !== "todos" && c.difficulty !== difficultyFilter)
         return false;
       if (categoryFilter !== "todos" && c.category !== categoryFilter)
         return false;
       return true;
     });
-  }, [challenges, difficultyFilter, categoryFilter]);
+  }, [scopedChallenges, difficultyFilter, categoryFilter]);
 
   const categoriesPresent = useMemo(() => {
-    const set = new Set(challenges.map((c) => c.category).filter(Boolean));
+    const set = new Set(scopedChallenges.map((c) => c.category).filter(Boolean));
     return Array.from(set);
-  }, [challenges]);
+  }, [scopedChallenges]);
 
   const visibleSections =
     difficultyFilter === "todos"
@@ -789,7 +820,9 @@ const ChallengesSection = ({
           <>
             <h2 className="challenges-scope-title">Catálogo de desafíos</h2>
             <p className="challenges-scope-text">
-              Ves el catálogo completo.{" "}
+              {comisionVista
+                ? `Estás viendo los ${scopedChallenges.length} desafíos de la comisión "${comisionVista.name}", tal como los ve un alumno de esa comisión.`
+                : "Ves el catálogo completo."}{" "}
               {user && user.role === "docente"
                 ? 'Qué desafíos ve cada comisión se elige en la pestaña "Mis comisiones". '
                 : ""}
@@ -869,6 +902,33 @@ const ChallengesSection = ({
                 {CATEGORY_LABELS[cat] || cat}
               </button>
             ))}
+          </div>
+        )}
+
+        {isTeacherView && staffClasses.length > 0 && (
+          <div className="challenges-filter-group">
+            <label className="challenges-filter-label" htmlFor="challenges-ver-como">
+              Ver como:
+            </label>
+            <select
+              id="challenges-ver-como"
+              className="form-select form-select-sm challenges-viewas-select"
+              value={viewAs}
+              onChange={(e) => {
+                setViewAs(e.target.value);
+                // Las categorías disponibles cambian según la comisión.
+                setCategoryFilter("todos");
+              }}
+            >
+              <option value="todos">Todos los desafíos</option>
+              {staffClasses.map((c) => (
+                <option key={c.id} value={String(c.id)}>
+                  {user.role === "admin" && c.class_code
+                    ? `${c.name} (${c.class_code})`
+                    : c.name}
+                </option>
+              ))}
+            </select>
           </div>
         )}
 
