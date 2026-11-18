@@ -35,6 +35,9 @@ export default function AdminDashboard({ apiUrl }) {
   const [perPage, setPerPage] = useState(20);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  // Orden por puntos / completados. Lo hace el servidor sobre todos los
+  // usuarios (no sólo la página visible). campo: null | "points" | "completed".
+  const [orden, setOrden] = useState({ campo: null, dir: "desc" });
 
   const teachers = useMemo(
     () => users.filter((u) => u.role === "docente"),
@@ -45,7 +48,8 @@ export default function AdminDashboard({ apiUrl }) {
     query = q,
     role = roleFilter,
     pageOverride = page,
-    perPageOverride = perPage
+    perPageOverride = perPage,
+    ordenOverride = orden
   ) => {
     setLoading(true);
     setError("");
@@ -55,6 +59,8 @@ export default function AdminDashboard({ apiUrl }) {
         role,
         page: pageOverride,
         perPage: perPageOverride,
+        sort: ordenOverride.campo || "",
+        order: ordenOverride.dir,
       });
       setUsers(data.users || []);
       setClasses(data.classes || []);
@@ -89,6 +95,28 @@ export default function AdminDashboard({ apiUrl }) {
     setPage(1);
     load(q, roleFilter, 1, newPerPage);
   };
+
+  // Al tocar un encabezado: mayor a menor -> menor a mayor -> orden original
+  // (por email). Si se toca otra columna, arranca de mayor a menor.
+  const alternarOrden = (campo) => {
+    let siguiente;
+    if (orden.campo !== campo) siguiente = { campo, dir: "desc" };
+    else if (orden.dir === "desc") siguiente = { campo, dir: "asc" };
+    else siguiente = { campo: null, dir: "desc" };
+    setOrden(siguiente);
+    setPage(1);
+    load(q, roleFilter, 1, perPage, siguiente);
+  };
+
+  const flechaOrden = (campo) =>
+    orden.campo !== campo ? "↕" : orden.dir === "desc" ? "▼" : "▲";
+
+  const ariaSortDe = (campo) =>
+    orden.campo !== campo
+      ? "none"
+      : orden.dir === "desc"
+      ? "descending"
+      : "ascending";
 
   const handleRoleChange = async (user, newRole) => {
     if (newRole === user.role) return;
@@ -197,10 +225,12 @@ export default function AdminDashboard({ apiUrl }) {
             type="button"
             className="btn btn-outline-secondary btn-sm"
             onClick={() => {
+              const sinOrden = { campo: null, dir: "desc" };
               setQ("");
               setRoleFilter("");
+              setOrden(sinOrden);
               setPage(1);
-              load("", "", 1, perPage);
+              load("", "", 1, perPage, sinOrden);
             }}
           >
             Limpiar
@@ -220,8 +250,27 @@ export default function AdminDashboard({ apiUrl }) {
                 <th>Email</th>
                 <th>Rol</th>
                 <th>Comisiones</th>
-                <th>Puntos</th>
-                <th>Completados</th>
+                {[
+                  ["points", "Puntos"],
+                  ["completed", "Completados"],
+                ].map(([campo, titulo]) => (
+                  <th
+                    key={campo}
+                    className="admin-th-sortable"
+                    onClick={() => alternarOrden(campo)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        alternarOrden(campo);
+                      }
+                    }}
+                    tabIndex={0}
+                    title={`Ordenar por ${titulo.toLowerCase()}`}
+                    aria-sort={ariaSortDe(campo)}
+                  >
+                    {titulo} {flechaOrden(campo)}
+                  </th>
+                ))}
                 <th>Último acceso</th>
                 <th>Acciones</th>
               </tr>

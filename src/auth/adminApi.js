@@ -15,13 +15,17 @@ async function handleResponse(response) {
 
 export async function adminListUsers(
   apiUrl,
-  { q = "", role = "", page = 1, perPage = 20 } = {}
+  { q = "", role = "", page = 1, perPage = 20, sort = "", order = "desc" } = {}
 ) {
   const params = new URLSearchParams();
   if (q) params.set("q", q);
   if (role) params.set("role", role);
   if (page) params.set("page", String(page));
   if (perPage) params.set("per_page", String(perPage));
+  if (sort) {
+    params.set("sort", sort);
+    params.set("order", order);
+  }
   const url = `${apiUrl}/admin/users?${params.toString()}`;
   const response = await authFetch(url);
   return handleResponse(response);

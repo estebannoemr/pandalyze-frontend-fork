@@ -159,3 +159,13 @@
 .admin-pagination-page {
   font-weight: 600;
 }
+
+/* Encabezados ordenables (puntos / completados) */
+.admin-th-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-th-sortable:hover {
+  text-decoration: underline;
+}

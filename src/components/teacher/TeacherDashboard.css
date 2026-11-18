@@ -97,3 +97,31 @@
   color: #495057;
   white-space: nowrap;
 }
+
+/* Filtro por comisión y orden por puntos */
+.teacher-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.teacher-filters select {
+  width: auto;
+  min-width: 180px;
+}
+
+.teacher-filters-count {
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+.teacher-th-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.teacher-th-sortable:hover {
+  text-decoration: underline;
+}
