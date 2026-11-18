@@ -41,6 +41,10 @@ export default function TeacherDashboard({ apiUrl }) {
   // y orden por una columna numérica: campo null = orden original,
   // "puntos" | "completados"; dir "desc" = mayor a menor, "asc" = menor a mayor.
   const [comisionFiltro, setComisionFiltro] = useState("todas");
+  // Subapartado visible: "comisiones" (por defecto) o "alumnos". Así la lista
+  // de alumnos, con sus emails y puntajes, no queda a la vista a menos que el
+  // docente la abra a propósito.
+  const [vista, setVista] = useState("comisiones");
   const [orden, setOrden] = useState({ campo: null, dir: "desc" });
 
   const load = async () => {
@@ -116,119 +120,149 @@ export default function TeacherDashboard({ apiUrl }) {
 
   return (
     <div className="teacher-dashboard">
-      {/* Sección de gestión de comisiones. El código de inscripción de cada
-          comisión se muestra en su tarjeta. */}
-      <MyClasses apiUrl={apiUrl} />
-
-      <div className="teacher-header">
-        <h2>Mis alumnos</h2>
-        <button className="btn btn-outline-primary" onClick={load}>
-          Actualizar
+      <div className="teacher-subtabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={vista === "comisiones"}
+          className={"teacher-subtab " + (vista === "comisiones" ? "active" : "")}
+          onClick={() => setVista("comisiones")}
+        >
+          Comisiones
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={vista === "alumnos"}
+          className={"teacher-subtab " + (vista === "alumnos" ? "active" : "")}
+          onClick={() => setVista("alumnos")}
+        >
+          Mis alumnos
+          {!loading && !error && (
+            <span className="teacher-subtab-count">{students.length}</span>
+          )}
         </button>
       </div>
 
-      {loading && <p>Cargando alumnos...</p>}
-      {error && <div className="teacher-error">{error}</div>}
+      {/* Gestión de comisiones (el código de inscripción de cada una se
+          muestra en su tarjeta) y lista de alumnos. Las dos vistas quedan
+          montadas y sólo se oculta una, así no se pierde lo que el docente
+          estaba editando al cambiar de subapartado. */}
+      <div hidden={vista !== "comisiones"}>
+        <MyClasses apiUrl={apiUrl} />
+      </div>
 
-      {!loading && !error && students.length === 0 && (
-        <p className="teacher-empty">
-          Todavía no hay alumnos en tus comisiones. Compartiles el código
-          de la comisión para que se sumen al registrarse o desde "Mi perfil".
-        </p>
-      )}
-
-      {!loading && !error && students.length > 0 && (
-        <div className="teacher-filters">
-          <label htmlFor="teacher-filtro-comision">Comisión:</label>
-          <select
-            id="teacher-filtro-comision"
-            className="form-select form-select-sm"
-            value={comisionFiltro}
-            onChange={(e) => setComisionFiltro(e.target.value)}
-          >
-            <option value="todas">Todas</option>
-            {comisiones.map(([id, nombre]) => (
-              <option key={id} value={String(id)}>
-                {nombre}
-              </option>
-            ))}
-            {haySinComision && <option value="none">Sin comisión</option>}
-          </select>
-          <span className="teacher-filters-count">
-            Mostrando {alumnosVisibles.length} de {students.length}
-          </span>
+      <div className="teacher-alumnos-view" hidden={vista !== "alumnos"}>
+        <div className="teacher-header">
+          <h2>Mis alumnos</h2>
+          <button className="btn btn-outline-primary" onClick={load}>
+            Actualizar
+          </button>
         </div>
-      )}
 
-      {!loading && !error && students.length > 0 && (
-        <div className="teacher-table-wrapper">
-          <table className="teacher-table">
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>Comisión</th>
-                <th>Nivel</th>
-                {[
-                  ["puntos", "Puntos"],
-                  ["completados", "Desafíos completados"],
-                ].map(([campo, titulo]) => (
-                  <th
-                    key={campo}
-                    className="teacher-th-sortable"
-                    onClick={() => alternarOrden(campo)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        alternarOrden(campo);
-                      }
-                    }}
-                    tabIndex={0}
-                    title={`Ordenar por ${titulo.toLowerCase()}`}
-                    aria-sort={ariaSortDe(campo)}
-                  >
-                    {titulo} {flechaOrden(campo)}
-                  </th>
-                ))}
-                <th>Último acceso</th>
-                <th title="Duración del primer → último desafío básico aprobado">
-                  Tiempo básico
-                </th>
-                <th title="Duración del primer → último desafío intermedio aprobado">
-                  Tiempo intermedio
-                </th>
-                <th title="Duración del primer → último desafío avanzado aprobado">
-                  Tiempo avanzado
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {alumnosVisibles.map((s) => (
-                <tr key={s.id}>
-                  <td>{s.email}</td>
-                  <td>{s.class_name || "Sin comisión"}</td>
-                  <td>
-                    <span className="teacher-level-badge">
-                      Nivel {s.level} - {s.level_title}
-                    </span>
-                  </td>
-                  <td className="teacher-points">{s.total_points}</td>
-                  <td>{s.completed_count}</td>
-                  <td>{formatDate(s.last_seen_at)}</td>
-                  <td className="teacher-timing">
-                    {renderTimingPair(s.timing, "basico")}
-                  </td>
-                  <td className="teacher-timing">
-                    {renderTimingPair(s.timing, "intermedio")}
-                  </td>
-                  <td className="teacher-timing">
-                    {renderTimingPair(s.timing, "avanzado")}
-                  </td>
-                </tr>
+        {loading && <p>Cargando alumnos...</p>}
+        {error && <div className="teacher-error">{error}</div>}
+
+        {!loading && !error && students.length === 0 && (
+          <p className="teacher-empty">
+            Todavía no hay alumnos en tus comisiones. Compartiles el código
+            de la comisión para que se sumen al registrarse o desde "Mi perfil".
+          </p>
+        )}
+
+        {!loading && !error && students.length > 0 && (
+          <div className="teacher-filters">
+            <label htmlFor="teacher-filtro-comision">Comisión:</label>
+            <select
+              id="teacher-filtro-comision"
+              className="form-select form-select-sm"
+              value={comisionFiltro}
+              onChange={(e) => setComisionFiltro(e.target.value)}
+            >
+              <option value="todas">Todas</option>
+              {comisiones.map(([id, nombre]) => (
+                <option key={id} value={String(id)}>
+                  {nombre}
+                </option>
               ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              {haySinComision && <option value="none">Sin comisión</option>}
+            </select>
+            <span className="teacher-filters-count">
+              Mostrando {alumnosVisibles.length} de {students.length}
+            </span>
+          </div>
+        )}
+
+        {!loading && !error && students.length > 0 && (
+          <div className="teacher-table-wrapper">
+            <table className="teacher-table">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Comisión</th>
+                  <th>Nivel</th>
+                  {[
+                    ["puntos", "Puntos"],
+                    ["completados", "Desafíos completados"],
+                  ].map(([campo, titulo]) => (
+                    <th
+                      key={campo}
+                      className="teacher-th-sortable"
+                      onClick={() => alternarOrden(campo)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          alternarOrden(campo);
+                        }
+                      }}
+                      tabIndex={0}
+                      title={`Ordenar por ${titulo.toLowerCase()}`}
+                      aria-sort={ariaSortDe(campo)}
+                    >
+                      {titulo} {flechaOrden(campo)}
+                    </th>
+                  ))}
+                  <th>Último acceso</th>
+                  <th title="Duración del primer → último desafío básico aprobado">
+                    Tiempo básico
+                  </th>
+                  <th title="Duración del primer → último desafío intermedio aprobado">
+                    Tiempo intermedio
+                  </th>
+                  <th title="Duración del primer → último desafío avanzado aprobado">
+                    Tiempo avanzado
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {alumnosVisibles.map((s) => (
+                  <tr key={s.id}>
+                    <td>{s.email}</td>
+                    <td>{s.class_name || "Sin comisión"}</td>
+                    <td>
+                      <span className="teacher-level-badge">
+                        Nivel {s.level} - {s.level_title}
+                      </span>
+                    </td>
+                    <td className="teacher-points">{s.total_points}</td>
+                    <td>{s.completed_count}</td>
+                    <td>{formatDate(s.last_seen_at)}</td>
+                    <td className="teacher-timing">
+                      {renderTimingPair(s.timing, "basico")}
+                    </td>
+                    <td className="teacher-timing">
+                      {renderTimingPair(s.timing, "intermedio")}
+                    </td>
+                    <td className="teacher-timing">
+                      {renderTimingPair(s.timing, "avanzado")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
